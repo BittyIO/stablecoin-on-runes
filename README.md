@@ -1,16 +1,16 @@
-# a contract to bridge stable
+# a contract to bridge stable coin from Ethereum to Bitcoin Runes
 
-//deposit DAI to contract
+`deposit DAI to contract`
 - deposit(amount)
 
-//query the DAI balance of an address
+`query the DAI balance of an address`
 - balanceOf(eth_address)
 
-//withdraw DAI to ethereum address
+`withdraw DAI to ethereum address`
 - withdraw(ethereum_address, amount)
 
-//mint DAI to bitcoin Runes
+`mint DAI to bitcoin Runes`
 - mint(amount, btc_address)
 
-//redeem DAI to ethereum address, ownerOnly
+`redeem DAI to ethereum address, ownerOnly`
 - redeem(redeem_bitcoin_tx, ethereum_address, amount)
