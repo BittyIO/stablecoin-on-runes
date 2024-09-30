@@ -1,66 +1,16 @@
-## Foundry
+# a contract to bridge stable
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+//deposit DAI to contract
+- deposit(amount)
 
-Foundry consists of:
+//query the DAI balance of an address
+- balanceOf(eth_address)
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+//withdraw DAI to ethereum address
+- withdraw(ethereum_address, amount)
 
-## Documentation
+//mint DAI to bitcoin Runes
+- mint(amount, btc_address)
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+//redeem DAI to ethereum address, ownerOnly
+- redeem(redeem_bitcoin_tx, ethereum_address, amount)
