@@ -1,14 +1,5 @@
 # a contract to bridge stable coin from Ethereum to Bitcoin Runes
 
-`deposit DAI to contract`
-- deposit(amount)
-
-`query the DAI balance of an address`
-- balanceOf(eth_address)
-
-`withdraw DAI to ethereum address`
-- withdraw(ethereum_address, amount)
-
 `mint DAI to bitcoin Runes`
 - mint(amount, btc_address)
 
