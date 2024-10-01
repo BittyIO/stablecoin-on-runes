@@ -1,4 +1,4 @@
-# a contract to bridge stable coin from Ethereum to Bitcoin Runes
+# Bridging Dai from Ethereum to Bitcoin Runes
 
 `mint DAI to bitcoin Runes`
 - mint(amount, btc_address)
