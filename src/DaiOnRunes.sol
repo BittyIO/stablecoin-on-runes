@@ -1,46 +1,29 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.27;
 
+import {IDaiOnRunes} from "./IDaiOnRunes.sol";
+import {Initializable} from "../lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
+import {ERC165} from "../lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
+import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 /**
  * @title Bridge Ethereum Dai to Bitcoin Runes
  * @dev Interface for minting Dai to Bitcoin Runes, redeeming it back to Ethereum, and managing fees
  */
-interface IDaiOnRunes {
-    /**
-     * @dev Emitted when Dai is minted to Bitcoin Runes
-     * @param from The Ethereum address initiating the mint
-     * @param bitcoinAddress The Bitcoin address receiving the minted Dai
-     * @param amount The amount of Dai minted
-     * @param fee The fee charged for minting
-     */
-    event Minted(address indexed from, string indexed bitcoinAddress, uint256 amount, uint256 fee);
+contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable {
+    uint256 private mintFee;
+    uint256 private redeemFee;
 
     /**
-     * @dev Emitted when Dai is redeemed back to Ethereum
-     * @param bitcoinTxId The Bitcoin transaction ID of the redeem transaction
-     * @param receiver The Ethereum address receiving the redeemed Dai
-     * @param amount The amount of Dai redeemed
-     * @param fee The fee charged for redeeming
+     * @inheritdoc ERC165
      */
-    event Redeemed(string indexed bitcoinTxId, address indexed receiver, uint256 amount, uint256 fee);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
+        return interfaceId == type(IDaiOnRunes).interfaceId || super.supportsInterface(interfaceId);
+    }
 
-    /**
-     * @dev Emitted when the mint fee is updated
-     * @param newFee The new mint fee
-     */
-    event MintFeeUpdated(uint256 newFee);
-
-    /**
-     * @dev Emitted when the redeem fee is updated
-     * @param newFee The new redeem fee
-     */
-    event RedeemFeeUpdated(uint256 newFee);
-
-    /**
-     * @dev Emitted when fees are withdrawn by the owner
-     * @param amount The amount of fees withdrawn
-     */
-    event FeesWithdrawn(uint256 amount);
+    function initialize(uint256 mintFee_, uint256 redeemFee_) public initializer {
+        mintFee = mintFee_;
+        redeemFee = redeemFee_;
+    }
 
     /**
      * @notice Mint Dai to Bitcoin Runes
@@ -49,7 +32,7 @@ interface IDaiOnRunes {
      * @param bitcoinAddress The Bitcoin address for receiving the Dai on Bitcoin Runes
      * @param amount The amount of Dai to mint
      */
-    function mint(string calldata bitcoinAddress, uint256 amount) external;
+    function mint(string calldata bitcoinAddress, uint256 amount) external {}
 
     /**
      * @notice Redeem Dai back to an Ethereum address (owner only)
@@ -60,7 +43,7 @@ interface IDaiOnRunes {
      * @param receiver The Ethereum address for receiving the Dai
      * @param amount The amount of Dai to redeem
      */
-    function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external;
+    function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external onlyOwner {}
 
     /**
      * @notice Set the mint fee (owner only)
@@ -68,7 +51,9 @@ interface IDaiOnRunes {
      * There will be a max fee hard coded in the contract to limit the power of contract owner.
      * @param newFee The new mint fee to set
      */
-    function setMintFee(uint256 newFee) external;
+    function setMintFee(uint256 newFee) external onlyOwner {
+        mintFee = newFee;
+    }
 
     /**
      * @notice Set the redeem fee (owner only)
@@ -76,23 +61,29 @@ interface IDaiOnRunes {
      * There will be a max fee hard coded in the contract to limit the power of contract owner.
      * @param newFee The new redeem fee to set
      */
-    function setRedeemFee(uint256 newFee) external;
+    function setRedeemFee(uint256 newFee) external onlyOwner {
+        redeemFee = newFee;
+    }
 
     /**
      * @notice Withdraw the accumulated mint and redeem fees (owner only)
      * @dev For each redeem and mint operation, the fee will be added to this contract to be withdrawn by the contract owner.
      */
-    function withdrawFee() external;
+    function withdrawFee() external onlyOwner {}
 
     /**
      * @notice Get the current mint fee
      * @return The current mint fee
      */
-    function getMintFee() external view returns (uint256);
+    function getMintFee() external view returns (uint256) {
+        return mintFee;
+    }
 
     /**
      * @notice Get the current redeem fee
      * @return The current redeem fee
      */
-    function getRedeemFee() external view returns (uint256);
+    function getRedeemFee() external view returns (uint256) {
+        return redeemFee;
+    }
 }
