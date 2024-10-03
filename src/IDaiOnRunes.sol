@@ -79,10 +79,16 @@ interface IDaiOnRunes {
     function setRedeemFee(uint256 newFee) external;
 
     /**
+     * @notice Get the current fee
+     * @return The total (mintFee + redeemFee)
+     */
+    function getFee() external view returns (uint256);
+
+    /**
      * @notice Withdraw the accumulated mint and redeem fees (owner only)
      * @dev For each redeem and mint operation, the fee will be added to this contract to be withdrawn by the contract owner.
      */
-    function withdrawFee() external;
+    function withdrawFee(uint256 amount) external;
 
     /**
      * @notice Get the current mint fee
