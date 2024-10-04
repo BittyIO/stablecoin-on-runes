@@ -9,28 +9,32 @@ import "../src/IDaiOnRunes.sol";
 
 contract DaiOnRunesTest is Test {
     DaiOnRunes public dor;
-    uint256 public fee;
     string public bitcoinAddress;
     string public bitcoinTxId;
     address public recevier;
+    address public alice;
+    address public bob;
+    Dai public dai;
 
     function setUp() public {
-        fee = 20;
+        dai = new Dai(11155111);
         dor = new DaiOnRunes();
-        dor.initialize(fee);
+        dor.initialize(address(dai));
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
         recevier = makeAddr("receiver");
+        alice = makeAddr("alice");
+        bob = makeAddr("bob");
     }
 
     function testSetMintFee() public {
-        uint256 mintFee = 10;
+        uint256 mintFee = _getDaiAmount(10);
         dor.setMintFee(mintFee);
         assertEq(dor.getMintFee(), mintFee);
     }
 
     function testSetRedeemFee() public {
-        uint256 redeemFee = 10;
+        uint256 redeemFee = _getDaiAmount(10);
         dor.setRedeemFee(redeemFee);
         assertEq(dor.getRedeemFee(), redeemFee);
     }
@@ -51,8 +55,13 @@ contract DaiOnRunesTest is Test {
         assertEq(dor.getFee(), 0);
         uint256 mintFee = dor.getMintFee();
         uint256 redeemFee = dor.getRedeemFee();
-        dor.mint(bitcoinAddress, mintFee + 1);
-        dor.redeem(bitcoinTxId, recevier, redeemFee + 1);
+        dai.mint(alice, _getDaiAmount(100));
+        vm.prank(alice);
+        uint256 mintAmount = mintFee * 3;
+        dai.approve(address(dor), mintAmount);
+        vm.prank(alice);
+        dor.mint(bitcoinAddress, mintAmount);
+        dor.redeem(bitcoinTxId, recevier, mintFee * 2);
         assertEq(dor.getFee(), mintFee + redeemFee);
     }
 
@@ -60,9 +69,40 @@ contract DaiOnRunesTest is Test {
         assertEq(dor.getFee(), 0);
         uint256 mintFee = dor.getMintFee();
         uint256 redeemFee = dor.getRedeemFee();
-        dor.mint(bitcoinAddress, mintFee + 1);
+        dai.mint(alice, _getDaiAmount(100));
+        vm.prank(alice);
+        uint256 mintAmount = mintFee + 1;
+        dai.approve(address(dor), mintAmount);
+        vm.prank(alice);
+        dor.mint(bitcoinAddress, mintAmount);
         dor.redeem(bitcoinTxId, recevier, redeemFee + 1);
         vm.expectRevert("withdraw amount more than fee");
         dor.withdrawFee(mintFee + redeemFee + 1);
+    }
+
+    function testMintDaiOnRunes() public {
+        dai.mint(alice, _getDaiAmount(100));
+        uint256 mintAmount = _getDaiAmount(99);
+        vm.prank(alice);
+        dai.approve(address(dor), mintAmount);
+        vm.prank(alice);
+        dor.mint(bitcoinAddress, mintAmount);
+        assertEq(dai.balanceOf(alice), _getDaiAmount(1));
+        assertEq(dai.balanceOf(address(dor)), _getDaiAmount(99));
+    }
+
+    function testRedeemDaiOnRunes() public {
+        dai.mint(alice, _getDaiAmount(100));
+        uint256 mintAmount = _getDaiAmount(99);
+        vm.prank(alice);
+        dai.approve(address(dor), mintAmount);
+        vm.prank(alice);
+        dor.mint(bitcoinAddress, mintAmount);
+        dor.redeem(bitcoinTxId, alice, mintAmount - dor.getMintFee());
+        assertEq(dai.balanceOf(alice), _getDaiAmount(100) - dor.getMintFee() - dor.getRedeemFee());
+    }
+
+    function _getDaiAmount(uint256 amount) internal pure returns (uint256) {
+        return amount * 1e18;
     }
 }
