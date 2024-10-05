@@ -102,6 +102,19 @@ contract DaiOnRunesTest is Test {
         assertEq(dai.balanceOf(alice), _getDaiAmount(100) - dor.getMintFee() - dor.getRedeemFee());
     }
 
+    function testWithdrawFee() public {
+        dai.mint(alice, _getDaiAmount(100));
+        uint256 mintAmount = _getDaiAmount(99);
+        vm.prank(alice);
+        dai.approve(address(dor), mintAmount);
+        vm.prank(alice);
+        dor.mint(bitcoinAddress, mintAmount);
+        dor.redeem(bitcoinTxId, alice, mintAmount - dor.getMintFee());
+	uint256 withdrawFee = _getDaiAmount(4);
+	dor.withdrawFee(withdrawFee);
+	assertEq(dai.balanceOf(address(this)), withdrawFee);
+    }
+
     function _getDaiAmount(uint256 amount) internal pure returns (uint256) {
         return amount * 1e18;
     }
