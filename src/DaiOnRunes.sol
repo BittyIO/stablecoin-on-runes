@@ -12,6 +12,9 @@ import {Dai} from "../lib/dss/src/dai.sol";
  * @title Bridge Ethereum Dai to Bitcoin Runes
  */
 contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable {
+    uint256 constant MAX_FEE = 10 * 1e18;
+    uint256 constant DEFAULT_FEE = 2 * 1e18;
+
     uint256 private mintFee;
     uint256 private redeemFee;
     uint256 private fee;
@@ -26,26 +29,29 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable {
 
     function initialize(address daiContract_) public initializer {
         dai = Dai(daiContract_);
-        mintFee = 2 * 1e18;
-        redeemFee = 2 * 1e18;
+        mintFee = DEFAULT_FEE;
+        redeemFee = DEFAULT_FEE;
     }
 
     function mint(string calldata bitcoinAddress, uint256 amount) external {
-        require(amount > mintFee, "mint amount less than mint fee");
+        require(amount > mintFee, "DaiOnRunes: mint amount less than mint fee");
         fee += mintFee;
-        uint256 balance = dai.balanceOf(msg.sender);
         dai.transferFrom(msg.sender, address(this), amount);
+        emit Minted(msg.sender, bitcoinAddress, amount, mintFee);
     }
 
     function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external onlyOwner {
-        require(amount > redeemFee, "redeem amount less than redeem fee");
+        require(amount > redeemFee, "DaiOnRunes: redeem amount less than redeem fee");
         fee += redeemFee;
         dai.transferFrom(address(this), receiver, amount - redeemFee);
+        emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
     function withdrawFee(uint256 amount) external onlyOwner {
-        require(amount <= fee, "withdraw amount more than fee");
+        require(amount <= fee, "DaiOnRunes: withdraw amount more than fee");
         dai.transferFrom(address(this), owner(), amount);
+        fee -= amount;
+        emit FeesWithdrawn(amount);
     }
 
     function getFee() external view returns (uint256) {
@@ -53,11 +59,15 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable {
     }
 
     function setMintFee(uint256 newFee) external onlyOwner {
+        require(newFee < MAX_FEE, "DaiOnRunes: mint fee over limit");
         mintFee = newFee;
+        emit MintFeeUpdated(newFee);
     }
 
     function setRedeemFee(uint256 newFee) external onlyOwner {
+        require(newFee < MAX_FEE, "DaiOnRunes: redeem fee over limit");
         redeemFee = newFee;
+        emit RedeemFeeUpdated(newFee);
     }
 
     function getMintFee() external view returns (uint256) {
