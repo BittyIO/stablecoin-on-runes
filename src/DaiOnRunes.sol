@@ -42,8 +42,15 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
         emit Minted(msg.sender, bitcoinAddress, amount, mintFee);
     }
 
+    /**
+     * @notice No one can stop people send redeem tx on Bitcoin, if redeem amount less than redeem fee, user will receive nothing and the redeem money will be kept as fee.
+     */
     function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external onlyOwner nonReentrant {
-        require(amount > redeemFee, "DaiOnRunes: redeem amount less than redeem fee");
+        if (amount <= redeemFee) {
+            emit Redeemed(bitcoinTxId, receiver, 0, amount);
+            fee += amount;
+            return;
+        }
         fee += redeemFee;
         dai.transferFrom(address(this), receiver, amount - redeemFee);
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
