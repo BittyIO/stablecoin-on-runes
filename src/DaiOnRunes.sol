@@ -11,7 +11,7 @@ import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.so
 import {Dai} from "../lib/dss/src/dai.sol";
 
 /**
- * @title Bridge Ethereum Dai to Bitcoin Runes
+ * @title Bridge Dai on EVMs to Bitcoin Runes
  */
 contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGuard {
     error MintAmountLessThanMintFee();

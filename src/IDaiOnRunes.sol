@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 /**
- * @title Bridge Ethereum Dai to Bitcoin Runes
+ * @title Bridge Dai on EVMs to Bitcoin Runes
  * @dev Interface for minting Dai to Bitcoin Runes, redeeming it back to Ethereum, and managing fees
  */
 interface IDaiOnRunes {
