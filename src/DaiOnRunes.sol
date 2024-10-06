@@ -20,7 +20,6 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
     error SetRedeemFeeOverLimit();
 
     uint256 constant MAX_FEE = 10 * 1e18;
-    uint256 constant DEFAULT_FEE = 2 * 1e18;
 
     uint256 private mintFee;
     uint256 private redeemFee;
@@ -34,10 +33,13 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
         return interfaceId == type(IDaiOnRunes).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    function initialize(address daiContract_) public initializer {
+    /**
+     * @notice set diffrent fee for different networks
+     */
+    function initialize(address daiContract_, uint256 fee_) public initializer {
         dai = Dai(daiContract_);
-        mintFee = DEFAULT_FEE;
-        redeemFee = DEFAULT_FEE;
+        mintFee = fee_;
+        redeemFee = fee_;
     }
 
     function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {

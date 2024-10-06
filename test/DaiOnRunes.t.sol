@@ -19,7 +19,7 @@ contract DaiOnRunesTest is Test {
     function setUp() public {
         dai = new Dai(11155111);
         dor = new DaiOnRunes();
-        dor.initialize(address(dai));
+        dor.initialize(address(dai), 2 * 1e18);
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
         recevier = makeAddr("receiver");
