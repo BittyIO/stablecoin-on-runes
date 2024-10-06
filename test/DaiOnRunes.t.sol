@@ -28,8 +28,8 @@ contract DaiOnRunesTest is Test {
     }
 
     function testSetMintFeeOverLimit() public {
-        uint256 mintFee = _getDaiAmount(10);
-        vm.expectRevert("DaiOnRunes: mint fee over limit");
+        uint256 mintFee = _getDaiAmount(11);
+        vm.expectRevert(DaiOnRunes.SetMintFeeOverLimit.selector);
         dor.setMintFee(mintFee);
     }
 
@@ -42,8 +42,8 @@ contract DaiOnRunesTest is Test {
     }
 
     function testSetRedeemFeeOverLimit() public {
-        uint256 redeemFee = _getDaiAmount(10);
-        vm.expectRevert("DaiOnRunes: redeem fee over limit");
+        uint256 redeemFee = _getDaiAmount(11);
+        vm.expectRevert(DaiOnRunes.SetRedeemFeeOverLimit.selector);
         dor.setRedeemFee(redeemFee);
     }
 
@@ -57,7 +57,7 @@ contract DaiOnRunesTest is Test {
 
     function testMintAmountLessThanMintFee() public {
         uint256 mintAmount = dor.getMintFee() - 1;
-        vm.expectRevert("DaiOnRunes: mint amount less than mint fee");
+        vm.expectRevert(DaiOnRunes.MintAmountLessThanMintFee.selector);
         dor.mint(bitcoinAddress, mintAmount);
     }
 
@@ -86,7 +86,7 @@ contract DaiOnRunesTest is Test {
         vm.prank(alice);
         dor.mint(bitcoinAddress, mintAmount);
         dor.redeem(bitcoinTxId, recevier, redeemFee + 1);
-        vm.expectRevert("DaiOnRunes: withdraw amount more than fee");
+        vm.expectRevert(DaiOnRunes.WithdrawAmountMoreThanFee.selector);
         dor.withdrawFee(mintFee + redeemFee + 1);
     }
 

@@ -14,6 +14,11 @@ import {Dai} from "../lib/dss/src/dai.sol";
  * @title Bridge Ethereum Dai to Bitcoin Runes
  */
 contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGuard {
+    error MintAmountLessThanMintFee();
+    error WithdrawAmountMoreThanFee();
+    error SetMintFeeOverLimit();
+    error SetRedeemFeeOverLimit();
+
     uint256 constant MAX_FEE = 10 * 1e18;
     uint256 constant DEFAULT_FEE = 2 * 1e18;
 
@@ -36,7 +41,9 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
     }
 
     function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {
-        require(amount > mintFee, "DaiOnRunes: mint amount less than mint fee");
+        if (amount <= mintFee) {
+            revert MintAmountLessThanMintFee();
+        }
         fee += mintFee;
         dai.transferFrom(msg.sender, address(this), amount);
         emit Minted(msg.sender, bitcoinAddress, amount, mintFee);
@@ -57,7 +64,9 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
     }
 
     function withdrawFee(uint256 amount) external onlyOwner nonReentrant {
-        require(amount <= fee, "DaiOnRunes: withdraw amount more than fee");
+        if (amount > fee) {
+            revert WithdrawAmountMoreThanFee();
+        }
         dai.transferFrom(address(this), owner(), amount);
         fee -= amount;
         emit FeesWithdrawn(amount);
@@ -68,13 +77,17 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
     }
 
     function setMintFee(uint256 newFee) external onlyOwner {
-        require(newFee < MAX_FEE, "DaiOnRunes: mint fee over limit");
+        if (newFee > MAX_FEE) {
+            revert SetMintFeeOverLimit();
+        }
         mintFee = newFee;
         emit MintFeeUpdated(newFee);
     }
 
     function setRedeemFee(uint256 newFee) external onlyOwner {
-        require(newFee < MAX_FEE, "DaiOnRunes: redeem fee over limit");
+        if (newFee > MAX_FEE) {
+            revert SetRedeemFeeOverLimit();
+        }
         redeemFee = newFee;
         emit RedeemFeeUpdated(newFee);
     }
