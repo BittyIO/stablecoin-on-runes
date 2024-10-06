@@ -139,9 +139,9 @@ contract DaiOnRunesTest is Test {
         dor.redeem(bitcoinTxId, alice, mintAmount - dor.getMintFee());
         uint256 withdrawFee = _getDaiAmount(4);
         vm.expectEmit(false, false, false, true);
-        emit IDaiOnRunes.FeesWithdrawn(withdrawFee);
-        dor.withdrawFee(withdrawFee);
-        assertEq(dai.balanceOf(address(this)), withdrawFee);
+        emit IDaiOnRunes.FeesWithdrawn(withdrawFee, bob);
+        dor.withdrawFee(withdrawFee, bob);
+        assertEq(dai.balanceOf(bob), withdrawFee);
         assertEq(dor.getFee(), 0);
     }
 

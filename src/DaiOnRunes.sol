@@ -65,11 +65,11 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
-    function withdrawFee(uint256 amount) external onlyOwner nonReentrant {
+    function withdrawFee(uint256 amount, address to) external onlyOwner nonReentrant {
         if (amount > fee) {
             revert WithdrawAmountMoreThanFee();
         }
-        dai.transferFrom(address(this), owner(), amount);
+        dai.transferFrom(address(this), to, amount);
         fee -= amount;
         emit FeesWithdrawn(amount);
     }
