@@ -39,8 +39,9 @@ interface IDaiOnRunes {
     /**
      * @dev Emitted when fees are withdrawn by the owner
      * @param amount The amount of fees withdrawn
+     * @param to The address to receive the fee
      */
-    event FeesWithdrawn(uint256 amount);
+    event FeesWithdrawn(uint256 amount, address indexed to);
 
     /**
      * @notice Mint Dai to Bitcoin Runes
@@ -87,8 +88,10 @@ interface IDaiOnRunes {
     /**
      * @notice Withdraw the accumulated mint and redeem fees (owner only)
      * @dev For each redeem and mint operation, the fee will be added to this contract to be withdrawn by the contract owner.
+     * @param amount The amount of fee to withdraw
+     * @param to The recevier address of the withdraw fee
      */
-    function withdrawFee(uint256 amount) external;
+    function withdrawFee(uint256 amount, address to) external;
 
     /**
      * @notice Get the current mint fee
