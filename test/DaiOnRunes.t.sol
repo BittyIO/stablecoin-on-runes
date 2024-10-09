@@ -87,7 +87,7 @@ contract DaiOnRunesTest is Test {
         dor.mint(bitcoinAddress, mintAmount);
         dor.redeem(bitcoinTxId, recevier, redeemFee + 1);
         vm.expectRevert(DaiOnRunes.WithdrawAmountMoreThanFee.selector);
-        dor.withdrawFee(mintFee + redeemFee + 1);
+        dor.withdrawFee(mintFee + redeemFee + 1, bob);
     }
 
     function testMintDaiOnRunes() public {

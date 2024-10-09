@@ -71,7 +71,7 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
         }
         dai.transferFrom(address(this), to, amount);
         fee -= amount;
-        emit FeesWithdrawn(amount);
+        emit FeesWithdrawn(amount, to);
     }
 
     function getFee() external view returns (uint256) {
