@@ -1,55 +1,55 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.27;
 
-import {IDaiOnRunes} from "./IDaiOnRunes.sol";
+import {IUSDTOnRunes} from "./IUSDTOnRunes.sol";
 import {Initializable} from "../lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {ERC165} from "../lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
 import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
-import {Dai} from "../lib/dss/src/dai.sol";
+import {TetherToken} from "../lib/usdt/TetherToken.sol";
 
 /**
- * @title Bridge Dai on EVMs to Bitcoin Runes
+ * @title Bridge USDT on EVMs to Bitcoin Runes
  */
-contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGuard {
+contract USDTOnRunes is IUSDTOnRunes, Ownable, ERC165, Initializable, ReentrancyGuard {
     error MintAmountLessThanMintFee();
     error WithdrawAmountMoreThanFee();
     error SetMintFeeOverLimit();
     error SetRedeemFeeOverLimit();
 
-    uint256 constant MAX_FEE = 10 * 1e18;
+    uint256 constant MAX_FEE = 10 * 1e6;
 
     uint256 private mintFee;
     uint256 private redeemFee;
     address private feeReceiver;
-    Dai private dai;
+    TetherToken private usdt;
 
     /**
      * @inheritdoc ERC165
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
-        return interfaceId == type(IDaiOnRunes).interfaceId || super.supportsInterface(interfaceId);
+        return interfaceId == type(IUSDTOnRunes).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
      * @notice set diffrent fee for different networks
      */
-    function initialize(address daiContract_, uint256 fee_, address feeReceiver_) public initializer {
-        dai = Dai(daiContract_);
-        dai.approve(address(this), type(uint256).max);
+    function initialize(address usdtContract_, uint256 fee_, address feeReceiver_) public initializer {
+        usdt = TetherToken(usdtContract_);
         mintFee = fee_;
         redeemFee = fee_;
         feeReceiver = feeReceiver_;
+        usdt.approve(address(this), type(uint256).max);
     }
 
     function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {
         if (amount <= mintFee) {
             revert MintAmountLessThanMintFee();
         }
-        dai.transferFrom(msg.sender, address(this), amount);
-        dai.transferFrom(address(this), feeReceiver, mintFee);
+        usdt.transferFrom(msg.sender, address(this), amount);
+        usdt.transferFrom(address(this), feeReceiver, mintFee);
         emit Minted(msg.sender, bitcoinAddress, amount, mintFee);
     }
 
@@ -61,8 +61,8 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
             emit Redeemed(bitcoinTxId, receiver, 0, amount);
             return;
         }
-        dai.transferFrom(address(this), receiver, amount - redeemFee);
-        dai.transferFrom(address(this), feeReceiver, redeemFee);
+        usdt.transferFrom(address(this), receiver, amount - redeemFee);
+        usdt.transferFrom(address(this), feeReceiver, redeemFee);
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
