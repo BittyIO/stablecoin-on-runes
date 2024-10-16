@@ -37,13 +37,6 @@ interface IDaiOnRunes {
     event RedeemFeeUpdated(uint256 newFee);
 
     /**
-     * @dev Emitted when fees are withdrawn by the owner
-     * @param amount The amount of fees withdrawn
-     * @param to The address to receive the fee
-     */
-    event FeesWithdrawn(uint256 amount, address indexed to);
-
-    /**
      * @notice Mint Dai to Bitcoin Runes
      * @dev For gas efficiency, this function does not validate the Bitcoin address.
      * Validate your Bitcoin address before minting to avoid loss of funds.
@@ -64,6 +57,12 @@ interface IDaiOnRunes {
     function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external;
 
     /**
+     * @notice Set fee receiver (owner only)
+     * @param receiver The Ethereum address for receiving the fee
+     */
+    function setReceiver(address receiver) external;
+
+    /**
      * @notice Set the mint fee (owner only)
      * @dev If the mint fee is n Dai, user will receive (mint_amount - n) Dai on Bitcoin Runes.
      * There will be a max fee hard coded in the contract to limit the power of contract owner.
@@ -78,20 +77,6 @@ interface IDaiOnRunes {
      * @param newFee The new redeem fee to set
      */
     function setRedeemFee(uint256 newFee) external;
-
-    /**
-     * @notice Get the current fee
-     * @return The total (mintFee + redeemFee)
-     */
-    function getFee() external view returns (uint256);
-
-    /**
-     * @notice Withdraw the accumulated mint and redeem fees (owner only)
-     * @dev For each redeem and mint operation, the fee will be added to this contract to be withdrawn by the contract owner.
-     * @param amount The amount of fee to withdraw
-     * @param to The recevier address of the withdraw fee
-     */
-    function withdrawFee(uint256 amount, address to) external;
 
     /**
      * @notice Get the current mint fee
