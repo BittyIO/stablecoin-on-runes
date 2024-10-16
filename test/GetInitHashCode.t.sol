@@ -7,10 +7,8 @@ import "ds-test/test.sol";
 import "../src/DaiOnRunes.sol";
 
 contract GetInitCodeHashTest is Test {
-  
     function testGetInitCodeHash() public pure {
         bytes memory bytecode = type(DaiOnRunes).creationCode;
         console.logBytes32(keccak256(abi.encodePacked(bytecode)));
     }
-    
 }

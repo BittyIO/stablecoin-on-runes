@@ -23,7 +23,7 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
 
     uint256 private mintFee;
     uint256 private redeemFee;
-    uint256 private fee;
+    address private feeReceiver;
     Dai private dai;
 
     /**
@@ -36,18 +36,19 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
     /**
      * @notice set diffrent fee for different networks
      */
-    function initialize(address daiContract_, uint256 fee_) public initializer {
+    function initialize(address daiContract_, uint256 fee_, address feeReceiver_) public initializer {
         dai = Dai(daiContract_);
         mintFee = fee_;
         redeemFee = fee_;
+        feeReceiver = feeReceiver_;
     }
 
     function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {
         if (amount <= mintFee) {
             revert MintAmountLessThanMintFee();
         }
-        fee += mintFee;
         dai.transferFrom(msg.sender, address(this), amount);
+        dai.transferFrom(address(this), feeReceiver, mintFee);
         emit Minted(msg.sender, bitcoinAddress, amount, mintFee);
     }
 
@@ -57,25 +58,16 @@ contract DaiOnRunes is IDaiOnRunes, Ownable, ERC165, Initializable, ReentrancyGu
     function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external onlyOwner nonReentrant {
         if (amount <= redeemFee) {
             emit Redeemed(bitcoinTxId, receiver, 0, amount);
-            fee += amount;
             return;
         }
-        fee += redeemFee;
         dai.transferFrom(address(this), receiver, amount - redeemFee);
+        dai.transferFrom(address(this), feeReceiver, redeemFee);
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
-    function withdrawFee(uint256 amount, address to) external onlyOwner nonReentrant {
-        if (amount > fee) {
-            revert WithdrawAmountMoreThanFee();
-        }
-        dai.transferFrom(address(this), to, amount);
-        fee -= amount;
-        emit FeesWithdrawn(amount, to);
-    }
-
-    function getFee() external view returns (uint256) {
-        return fee;
+    // should be a role for FeeManager to set this
+    function setReceiver(address receiver) external onlyOwner {
+        feeReceiver = receiver;
     }
 
     function setMintFee(uint256 newFee) external onlyOwner {

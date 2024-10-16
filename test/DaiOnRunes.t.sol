@@ -15,16 +15,21 @@ contract DaiOnRunesTest is Test {
     address public alice;
     address public bob;
     Dai public dai;
+    uint256 aliceBalance;
+    uint256 mintAmount;
 
     function setUp() public {
         dai = new Dai(11155111);
         dor = new DaiOnRunes();
-        dor.initialize(address(dai), 2 * 1e18);
+        dor.initialize(address(dai), _getDaiAmount(2), address(this));
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
         recevier = makeAddr("receiver");
         alice = makeAddr("alice");
         bob = makeAddr("bob");
+        aliceBalance = _getDaiAmount(100);
+        dai.mint(alice, aliceBalance);
+        mintAmount = _getDaiAmount(99);
     }
 
     function testSetMintFeeOverLimit() public {
@@ -56,56 +61,25 @@ contract DaiOnRunesTest is Test {
     }
 
     function testMintAmountLessThanMintFee() public {
-        uint256 mintAmount = dor.getMintFee() - 1;
+        uint256 daiMintAmount = dor.getMintFee() - 1;
         vm.expectRevert(DaiOnRunes.MintAmountLessThanMintFee.selector);
-        dor.mint(bitcoinAddress, mintAmount);
-    }
-
-    function testGetFee() public {
-        assertEq(dor.getFee(), 0);
-        uint256 mintFee = dor.getMintFee();
-        uint256 redeemFee = dor.getRedeemFee();
-        dai.mint(alice, _getDaiAmount(100));
-        vm.prank(alice);
-        uint256 mintAmount = mintFee * 3;
-        dai.approve(address(dor), mintAmount);
-        vm.prank(alice);
-        dor.mint(bitcoinAddress, mintAmount);
-        dor.redeem(bitcoinTxId, recevier, mintFee * 2);
-        assertEq(dor.getFee(), mintFee + redeemFee);
-    }
-
-    function testWithdrawMoreFee() public {
-        assertEq(dor.getFee(), 0);
-        uint256 mintFee = dor.getMintFee();
-        uint256 redeemFee = dor.getRedeemFee();
-        dai.mint(alice, _getDaiAmount(100));
-        vm.prank(alice);
-        uint256 mintAmount = mintFee + 1;
-        dai.approve(address(dor), mintAmount);
-        vm.prank(alice);
-        dor.mint(bitcoinAddress, mintAmount);
-        dor.redeem(bitcoinTxId, recevier, redeemFee + 1);
-        vm.expectRevert(DaiOnRunes.WithdrawAmountMoreThanFee.selector);
-        dor.withdrawFee(mintFee + redeemFee + 1, bob);
+        dor.mint(bitcoinAddress, daiMintAmount);
     }
 
     function testMintDaiOnRunes() public {
-        dai.mint(alice, _getDaiAmount(100));
-        uint256 mintAmount = _getDaiAmount(99);
         vm.prank(alice);
         dai.approve(address(dor), mintAmount);
         vm.expectEmit(true, true, true, true);
         emit IDaiOnRunes.Minted(alice, bitcoinAddress, mintAmount, dor.getMintFee());
         vm.prank(alice);
         dor.mint(bitcoinAddress, mintAmount);
-        assertEq(dai.balanceOf(alice), _getDaiAmount(1));
-        assertEq(dai.balanceOf(address(dor)), _getDaiAmount(99));
+        uint256 mintFee = dor.getMintFee();
+        assertEq(dai.balanceOf(alice), aliceBalance - mintAmount);
+        assertEq(dai.balanceOf(address(dor)), mintAmount - mintFee);
+        assertEq(dai.balanceOf(address(this)), dor.getMintFee());
     }
 
     function testRedeemLessThanRedeemFee() public {
-        dai.mint(alice, _getDaiAmount(100));
-        uint256 mintAmount = _getDaiAmount(99);
         vm.prank(alice);
         dai.approve(address(dor), mintAmount);
         vm.prank(alice);
@@ -113,11 +87,11 @@ contract DaiOnRunesTest is Test {
         uint256 redeemAmount = dor.getRedeemFee() - 1;
         dor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(dai.balanceOf(bob), 0);
+        assertEq(dai.balanceOf(address(dor)), mintAmount - dor.getRedeemFee());
+        assertEq(dai.balanceOf(address(this)), dor.getRedeemFee());
     }
 
     function testRedeemDaiOnRunes() public {
-        dai.mint(alice, _getDaiAmount(100));
-        uint256 mintAmount = _getDaiAmount(99);
         vm.prank(alice);
         dai.approve(address(dor), mintAmount);
         vm.prank(alice);
@@ -126,23 +100,9 @@ contract DaiOnRunesTest is Test {
         vm.expectEmit(true, true, true, true);
         emit IDaiOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, dor.getRedeemFee());
         dor.redeem(bitcoinTxId, alice, redeemAmount);
-        assertEq(dai.balanceOf(alice), _getDaiAmount(100) - dor.getMintFee() - dor.getRedeemFee());
-    }
-
-    function testWithdrawFee() public {
-        dai.mint(alice, _getDaiAmount(100));
-        uint256 mintAmount = _getDaiAmount(99);
-        vm.prank(alice);
-        dai.approve(address(dor), mintAmount);
-        vm.prank(alice);
-        dor.mint(bitcoinAddress, mintAmount);
-        dor.redeem(bitcoinTxId, alice, mintAmount - dor.getMintFee());
-        uint256 withdrawFee = _getDaiAmount(4);
-        vm.expectEmit(false, false, false, true);
-        emit IDaiOnRunes.FeesWithdrawn(withdrawFee, bob);
-        dor.withdrawFee(withdrawFee, bob);
-        assertEq(dai.balanceOf(bob), withdrawFee);
-        assertEq(dor.getFee(), 0);
+        assertEq(dai.balanceOf(alice), aliceBalance - dor.getMintFee() - dor.getRedeemFee());
+        assertEq(dai.balanceOf(address(dor)), 0);
+        assertEq(dai.balanceOf(address(this)), dor.getRedeemFee() + dor.getMintFee());
     }
 
     function _getDaiAmount(uint256 amount) internal pure returns (uint256) {
