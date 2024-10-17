@@ -1,12 +1,8 @@
-# Dai On Runes
+# Stable Coin On Runes
 
 ## Introduction
 
-Dai on Runes is a project that bridges Dai-on-EVM to Bitcoin Runes. As [Bitty](https://bitty.io) started with lending, and users need to borrow stable coins against their assets, we've created Dai on Runes to meet this demand.
-
-## Why Dai?
-
-We chose to implement Dai to ensure the security and stability of the system. By using Dai, we mitigate the risk of contract attacks through illegal minting of stablecoins. This protection ensures that regular users can always redeem their stablecoins.
+Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin Runes. As [Bitty](https://bitty.io) started with lending, and users need to borrow USDT, USDC, Dai against their assets, we've created Dai on Runes to meet this demand.
 
 ## Features
 
