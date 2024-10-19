@@ -7,17 +7,21 @@ import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20
 import {ERC165} from "../lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
-import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Ownable2Step} from "../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
+import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 import {TetherToken} from "../lib/usdt/TetherToken.sol";
 
 /**
  * @title Bridge USDT on EVMs to Bitcoin Runes
  */
-contract USDTOnRunes is IUSDTOnRunes, Ownable, ERC165, Initializable, ReentrancyGuard {
+contract USDTOnRunes is IUSDTOnRunes, Ownable2Step, ERC165, Initializable, ReentrancyGuard, AccessControl {
     error MintAmountLessThanMintFee();
     error WithdrawAmountMoreThanFee();
     error SetMintFeeOverLimit();
     error SetRedeemFeeOverLimit();
+
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
 
     uint256 constant MAX_FEE = 10 * 1e6;
 
@@ -29,7 +33,7 @@ contract USDTOnRunes is IUSDTOnRunes, Ownable, ERC165, Initializable, Reentrancy
     /**
      * @inheritdoc ERC165
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
         return interfaceId == type(IUSDTOnRunes).interfaceId || super.supportsInterface(interfaceId);
     }
 
@@ -42,8 +46,14 @@ contract USDTOnRunes is IUSDTOnRunes, Ownable, ERC165, Initializable, Reentrancy
         redeemFee = fee_;
         feeReceiver = feeReceiver_;
         usdt.approve(address(this), type(uint256).max);
+        _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    /**
+     * @notice Since bitcoin tx send Runes to users need transaction fee so mintFee should not be 0.
+     */
     function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {
         if (amount <= mintFee) {
             revert MintAmountLessThanMintFee();
@@ -54,9 +64,13 @@ contract USDTOnRunes is IUSDTOnRunes, Ownable, ERC165, Initializable, Reentrancy
     }
 
     /**
-     * @notice No one can stop people send redeem tx on Bitcoin, if redeem amount less than redeem fee, user will receive nothing and the redeem money will be kept as fee.
+     * @notice No one can stop people send redeem tx on Bitcoin, if redeem amount less than redeem fee, user will receive nothing and the redeem money will be kept as fee, since bitcoin tx need fee so redeemFee should not be 0.
      */
-    function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external onlyOwner nonReentrant {
+    function redeem(
+        string calldata bitcoinTxId,
+        address receiver,
+        uint256 amount
+    ) external nonReentrant onlyRole(MINTER_ROLE) {
         if (amount <= redeemFee) {
             emit Redeemed(bitcoinTxId, receiver, 0, amount);
             return;
@@ -66,12 +80,15 @@ contract USDTOnRunes is IUSDTOnRunes, Ownable, ERC165, Initializable, Reentrancy
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
-    // should be a role for FeeManager to set this
-    function setReceiver(address receiver) external onlyOwner {
+    function setReceiver(address receiver) external onlyRole(FEE_MANAGER_ROLE) {
         feeReceiver = receiver;
     }
 
-    function setMintFee(uint256 newFee) external onlyOwner {
+    function getReceiver() external view returns (address) {
+        return feeReceiver;
+    }
+
+    function setMintFee(uint256 newFee) external onlyRole(FEE_MANAGER_ROLE) {
         if (newFee > MAX_FEE) {
             revert SetMintFeeOverLimit();
         }
@@ -79,7 +96,7 @@ contract USDTOnRunes is IUSDTOnRunes, Ownable, ERC165, Initializable, Reentrancy
         emit MintFeeUpdated(newFee);
     }
 
-    function setRedeemFee(uint256 newFee) external onlyOwner {
+    function setRedeemFee(uint256 newFee) external onlyRole(FEE_MANAGER_ROLE) {
         if (newFee > MAX_FEE) {
             revert SetRedeemFeeOverLimit();
         }
