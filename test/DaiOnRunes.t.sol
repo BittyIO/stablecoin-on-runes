@@ -10,9 +10,11 @@ contract DaiOnRunesTest is Test {
     DaiOnRunes public dor;
     string public bitcoinAddress;
     string public bitcoinTxId;
-    address public recevier;
+    address public receiver;
     address public alice;
     address public bob;
+    address public minter;
+    address public feeManager;
     Dai public dai;
     uint256 aliceBalance;
     uint256 mintAmount;
@@ -23,17 +25,48 @@ contract DaiOnRunesTest is Test {
         dor.initialize(address(dai), _getDaiAmount(2), address(this));
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
-        recevier = makeAddr("receiver");
+        receiver = makeAddr("receiver");
         alice = makeAddr("alice");
         bob = makeAddr("bob");
+        minter = makeAddr("minter");
+        feeManager = makeAddr("feeManager");
         aliceBalance = _getDaiAmount(100);
         dai.mint(alice, aliceBalance);
         mintAmount = _getDaiAmount(99);
+        dor.grantRole(dor.FEE_MANAGER_ROLE(), address(feeManager));
+        dor.grantRole(dor.MINTER_ROLE(), address(minter));
+    }
+
+    function testSetReceiverRoleError() public {
+        vm.expectRevert();
+        dor.setReceiver(receiver);
+    }
+
+    function testMinterRoleError() public {
+        vm.expectRevert();
+        dor.mint(bitcoinAddress, _getDaiAmount(1));
+    }
+
+    function testSetReceiverWithRightRole() public {
+        vm.prank(address(this));
+        assertTrue(dor.hasRole(dor.FEE_MANAGER_ROLE(), address(feeManager)));
+        vm.prank(feeManager);
+        dor.setReceiver(receiver);
+        assertEq(dor.getReceiver(), receiver);
+    }
+
+    function testSetMinterWithRightRole() public {
+        vm.prank(address(this));
+        assertTrue(dor.hasRole(dor.FEE_MANAGER_ROLE(), address(feeManager)));
+        vm.prank(feeManager);
+        dor.setReceiver(receiver);
+        assertEq(dor.getReceiver(), receiver);
     }
 
     function testSetMintFeeOverLimit() public {
         uint256 mintFee = _getDaiAmount(11);
         vm.expectRevert(DaiOnRunes.SetMintFeeOverLimit.selector);
+        vm.prank(feeManager);
         dor.setMintFee(mintFee);
     }
 
@@ -41,6 +74,7 @@ contract DaiOnRunesTest is Test {
         uint256 mintFee = _getDaiAmount(1);
         vm.expectEmit(false, false, false, true);
         emit IDaiOnRunes.MintFeeUpdated(mintFee);
+        vm.prank(feeManager);
         dor.setMintFee(mintFee);
         assertEq(dor.getMintFee(), mintFee);
     }
@@ -48,6 +82,7 @@ contract DaiOnRunesTest is Test {
     function testSetRedeemFeeOverLimit() public {
         uint256 redeemFee = _getDaiAmount(11);
         vm.expectRevert(DaiOnRunes.SetRedeemFeeOverLimit.selector);
+        vm.prank(feeManager);
         dor.setRedeemFee(redeemFee);
     }
 
@@ -55,6 +90,7 @@ contract DaiOnRunesTest is Test {
         uint256 redeemFee = _getDaiAmount(1);
         vm.expectEmit(false, false, false, true);
         emit IDaiOnRunes.RedeemFeeUpdated(redeemFee);
+        vm.prank(feeManager);
         dor.setRedeemFee(redeemFee);
         assertEq(dor.getRedeemFee(), redeemFee);
     }
@@ -84,6 +120,7 @@ contract DaiOnRunesTest is Test {
         vm.prank(alice);
         dor.mint(bitcoinAddress, mintAmount);
         uint256 redeemAmount = dor.getRedeemFee() - 1;
+        vm.prank(minter);
         dor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(dai.balanceOf(bob), 0);
         assertEq(dai.balanceOf(address(dor)), mintAmount - dor.getRedeemFee());
@@ -98,6 +135,7 @@ contract DaiOnRunesTest is Test {
         uint256 redeemAmount = mintAmount - dor.getMintFee();
         vm.expectEmit(true, true, true, true);
         emit IDaiOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, dor.getRedeemFee());
+        vm.prank(minter);
         dor.redeem(bitcoinTxId, alice, redeemAmount);
         assertEq(dai.balanceOf(alice), aliceBalance - dor.getMintFee() - dor.getRedeemFee());
         assertEq(dai.balanceOf(address(dor)), 0);
