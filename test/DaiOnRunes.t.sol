@@ -111,7 +111,7 @@ contract DaiOnRunesTest is Test {
         uint256 mintFee = dor.getMintFee();
         assertEq(dai.balanceOf(alice), aliceBalance - mintAmount);
         assertEq(dai.balanceOf(address(dor)), mintAmount - mintFee);
-        assertEq(dai.balanceOf(address(this)), dor.getMintFee());
+        assertEq(dai.balanceOf(address(this)), mintFee);
     }
 
     function testRedeemLessThanRedeemFee() public {

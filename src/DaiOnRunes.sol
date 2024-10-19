@@ -21,9 +21,9 @@ contract DaiOnRunes is IDaiOnRunes, Ownable2Step, ERC165, Initializable, Reentra
     error SetMintFeeOverLimit();
     error SetRedeemFeeOverLimit();
 
-    uint256 constant MAX_FEE = 10 * 1e18;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
+    uint256 constant MAX_FEE = 10 * 1e18;
 
     uint256 private mintFee;
     uint256 private redeemFee;
@@ -53,7 +53,7 @@ contract DaiOnRunes is IDaiOnRunes, Ownable2Step, ERC165, Initializable, Reentra
 
     /**
      * @notice Since bitcoin tx send Runes to users need transaction fee so mintFee should not be 0.
-     */    
+     */
     function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {
         if (amount <= mintFee) {
             revert MintAmountLessThanMintFee();
