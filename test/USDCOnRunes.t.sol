@@ -10,9 +10,11 @@ contract USDCOnRunesTest is Test {
     USDCOnRunes public usdcor;
     string public bitcoinAddress;
     string public bitcoinTxId;
-    address public recevier;
+    address public receiver;
     address public alice;
     address public bob;
+    address public minter;
+    address public feeManager;
     FiatTokenV2 public usdc;
     uint256 aliceBalance;
     uint256 mintAmount;
@@ -28,16 +30,47 @@ contract USDCOnRunesTest is Test {
         usdcor.initialize(address(usdc), _getUSDCAmount(2), address(this));
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
-        recevier = makeAddr("receiver");
+        receiver = makeAddr("receiver");
         alice = makeAddr("alice");
         bob = makeAddr("bob");
         usdc.mint(alice, aliceBalance);
+        minter = makeAddr("minter");
+        feeManager = makeAddr("feeManager");
         mintAmount = _getUSDCAmount(99);
+        usdcor.grantRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager));
+        usdcor.grantRole(usdcor.MINTER_ROLE(), address(minter));
+    }
+
+    function testSetReceiverRoleError() public {
+        vm.expectRevert();
+        usdcor.setReceiver(receiver);
+    }
+
+    function testMinterRoleError() public {
+        vm.expectRevert();
+        usdcor.mint(bitcoinAddress, _getUSDCAmount(1));
+    }
+
+    function testSetReceiverWithRightRole() public {
+        vm.prank(address(this));
+        assertTrue(usdcor.hasRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager)));
+        vm.prank(feeManager);
+        usdcor.setReceiver(receiver);
+        assertEq(usdcor.getReceiver(), receiver);
+    }
+
+    function testSetMinterWithRightRole() public {
+        vm.prank(address(this));
+        assertTrue(usdcor.hasRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager)));
+        vm.prank(feeManager);
+        usdcor.setReceiver(receiver);
+        assertEq(usdcor.getReceiver(), receiver);
     }
 
     function testSetMintFeeOverLimit() public {
         uint256 mintFee = _getUSDCAmount(11);
         vm.expectRevert(USDCOnRunes.SetMintFeeOverLimit.selector);
+        vm.prank(feeManager);
         usdcor.setMintFee(mintFee);
     }
 
@@ -45,6 +78,7 @@ contract USDCOnRunesTest is Test {
         uint256 mintFee = _getUSDCAmount(1);
         vm.expectEmit(false, false, false, true);
         emit IUSDCOnRunes.MintFeeUpdated(mintFee);
+        vm.prank(feeManager);
         usdcor.setMintFee(mintFee);
         assertEq(usdcor.getMintFee(), mintFee);
     }
@@ -52,6 +86,7 @@ contract USDCOnRunesTest is Test {
     function testSetRedeemFeeOverLimit() public {
         uint256 redeemFee = _getUSDCAmount(11);
         vm.expectRevert(USDCOnRunes.SetRedeemFeeOverLimit.selector);
+        vm.prank(feeManager);
         usdcor.setRedeemFee(redeemFee);
     }
 
@@ -59,6 +94,7 @@ contract USDCOnRunesTest is Test {
         uint256 redeemFee = _getUSDCAmount(1);
         vm.expectEmit(false, false, false, true);
         emit IUSDCOnRunes.RedeemFeeUpdated(redeemFee);
+        vm.prank(feeManager);
         usdcor.setRedeemFee(redeemFee);
         assertEq(usdcor.getRedeemFee(), redeemFee);
     }
@@ -88,6 +124,7 @@ contract USDCOnRunesTest is Test {
         vm.prank(alice);
         usdcor.mint(bitcoinAddress, mintAmount);
         uint256 redeemAmount = usdcor.getRedeemFee() - 1;
+        vm.prank(minter);
         usdcor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(usdc.balanceOf(bob), 0);
         assertEq(usdc.balanceOf(address(usdcor)), mintAmount - usdcor.getRedeemFee());
@@ -102,6 +139,7 @@ contract USDCOnRunesTest is Test {
         uint256 redeemAmount = mintAmount - usdcor.getMintFee();
         vm.expectEmit(true, true, true, true);
         emit IUSDCOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, usdcor.getRedeemFee());
+        vm.prank(minter);
         usdcor.redeem(bitcoinTxId, alice, redeemAmount);
         assertEq(usdc.balanceOf(alice), aliceBalance - usdcor.getMintFee() - usdcor.getRedeemFee());
         assertEq(usdc.balanceOf(address(usdcor)), 0);
