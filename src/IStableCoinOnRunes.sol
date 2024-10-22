@@ -2,24 +2,24 @@
 pragma solidity ^0.8.27;
 
 /**
- * @title Bridge Dai on EVMs to Bitcoin Runes
- * @dev Interface for minting Dai to Bitcoin Runes, redeeming it back to Ethereum, and managing fees
+ * @title Bridge Stable Coin on EVMs to Bitcoin Runes
+ * @dev Interface for minting Stable Coin to Bitcoin Runes, redeeming it back to Ethereum, and managing fees
  */
-interface IUSDCOnRunes {
+interface IStableCoinOnRunes {
     /**
-     * @dev Emitted when Dai is minted to Bitcoin Runes
+     * @dev Emitted when Stable Coin is minted to Bitcoin Runes
      * @param from The Ethereum address initiating the mint
-     * @param bitcoinAddress The Bitcoin address receiving the minted Dai
-     * @param amount The amount of Dai minted
+     * @param bitcoinAddress The Bitcoin address receiving the minted Stable Coin
+     * @param amount The amount of Stable Coin minted
      * @param fee The fee charged for minting
      */
     event Minted(address indexed from, string indexed bitcoinAddress, uint256 amount, uint256 fee);
 
     /**
-     * @dev Emitted when Dai is redeemed back to Ethereum
+     * @dev Emitted when Stable Coin is redeemed back to Ethereum
      * @param bitcoinTxId The Bitcoin transaction ID of the redeem transaction
-     * @param receiver The Ethereum address receiving the redeemed Dai
-     * @param amount The amount of Dai redeemed
+     * @param receiver The Ethereum address receiving the redeemed Stable Coin
+     * @param amount The amount of Stable Coin redeemed
      * @param fee The fee charged for redeeming
      */
     event Redeemed(string indexed bitcoinTxId, address indexed receiver, uint256 amount, uint256 fee);
@@ -37,29 +37,22 @@ interface IUSDCOnRunes {
     event RedeemFeeUpdated(uint256 newFee);
 
     /**
-     * @dev Emitted when fees are withdrawn by the owner
-     * @param amount The amount of fees withdrawn
-     * @param to The address to receive the fee
-     */
-    event FeesWithdrawn(uint256 amount, address indexed to);
-
-    /**
-     * @notice Mint Dai to Bitcoin Runes
+     * @notice Mint Stable Coin to Bitcoin Runes
      * @dev For gas efficiency, this function does not validate the Bitcoin address.
      * Validate your Bitcoin address before minting to avoid loss of funds.
-     * @param bitcoinAddress The Bitcoin address for receiving the Dai on Bitcoin Runes
-     * @param amount The amount of Dai to mint
+     * @param bitcoinAddress The Bitcoin address for receiving the Stable Coin on Bitcoin Runes
+     * @param amount The amount of Stable Coin to mint
      */
     function mint(string calldata bitcoinAddress, uint256 amount) external;
 
     /**
-     * @notice Redeem Dai back to an Ethereum address (owner only)
-     * @dev Users send Dai on Bitcoin Runes to the official redeem Bitcoin address with
-     * op_return containing the Ethereum address for receiving Dai. Only the owner's
-     * multi-sig address can call this function to redeem Dai back to the user's Ethereum address.
+     * @notice Redeem Stable Coin back to an Ethereum address (owner only)
+     * @dev Users send Stable Coin on Bitcoin Runes to the official redeem Bitcoin address with
+     * op_return containing the Ethereum address for receiving Stable Coin. Only the owner's
+     * multi-sig address can call this function to redeem Stable Coin back to the user's Ethereum address.
      * @param bitcoinTxId The Bitcoin transaction ID of the redeem transaction
-     * @param receiver The Ethereum address for receiving the Dai
-     * @param amount The amount of Dai to redeem
+     * @param receiver The Ethereum address for receiving the Stable Coin
+     * @param amount The amount of Stable Coin to redeem
      */
     function redeem(string calldata bitcoinTxId, address receiver, uint256 amount) external;
 
@@ -67,11 +60,11 @@ interface IUSDCOnRunes {
      * @notice Set fee receiver (owner only)
      * @param receiver The Ethereum address for receiving the fee
      */
-    function setReceiver(address receiver) external;
+    function setFeeReceiver(address receiver) external;
 
     /**
      * @notice Set the mint fee (owner only)
-     * @dev If the mint fee is n Dai, user will receive (mint_amount - n) Dai on Bitcoin Runes.
+     * @dev If the mint fee is n Stable Coin, user will receive (mint_amount - n) Stable Coin on Bitcoin Runes.
      * There will be a max fee hard coded in the contract to limit the power of contract owner.
      * @param newFee The new mint fee to set
      */
@@ -79,7 +72,7 @@ interface IUSDCOnRunes {
 
     /**
      * @notice Set the redeem fee (owner only)
-     * @dev If the redeem fee is n Dai, user will receive (redeem_amount - n) Dai on Ethereum.
+     * @dev If the redeem fee is n Stable Coin, user will receive (redeem_amount - n) Stable Coin on Ethereum.
      * There will be a max fee hard coded in the contract to limit the power of contract owner.
      * @param newFee The new redeem fee to set
      */
@@ -96,4 +89,10 @@ interface IUSDCOnRunes {
      * @return The current redeem fee
      */
     function getRedeemFee() external view returns (uint256);
+
+    /**
+     * @notice Get fee receiver
+     * @return The current fee receiver
+     */
+    function getFeeReceiver() external view returns (address);
 }
