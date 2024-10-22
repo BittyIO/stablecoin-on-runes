@@ -4,7 +4,7 @@ pragma solidity ^0.8.27;
 import "forge-std/Test.sol";
 import "ds-test/test.sol";
 import "../src/USDTOnRunes.sol";
-import "../src/IUSDTOnRunes.sol";
+import "../src/IStableCoinOnRunes.sol";
 
 contract USDTOnRunesTest is Test {
     USDTOnRunes public usdtor;
@@ -39,7 +39,7 @@ contract USDTOnRunesTest is Test {
 
     function testSetReceiverRoleError() public {
         vm.expectRevert();
-        usdtor.setReceiver(receiver);
+        usdtor.setFeeReceiver(receiver);
     }
 
     function testMinterRoleError() public {
@@ -51,16 +51,16 @@ contract USDTOnRunesTest is Test {
         vm.prank(address(this));
         assertTrue(usdtor.hasRole(usdtor.FEE_MANAGER_ROLE(), address(feeManager)));
         vm.prank(feeManager);
-        usdtor.setReceiver(receiver);
-        assertEq(usdtor.getReceiver(), receiver);
+        usdtor.setFeeReceiver(receiver);
+        assertEq(usdtor.getFeeReceiver(), receiver);
     }
 
     function testSetMinterWithRightRole() public {
         vm.prank(address(this));
         assertTrue(usdtor.hasRole(usdtor.FEE_MANAGER_ROLE(), address(feeManager)));
         vm.prank(feeManager);
-        usdtor.setReceiver(receiver);
-        assertEq(usdtor.getReceiver(), receiver);
+        usdtor.setFeeReceiver(receiver);
+        assertEq(usdtor.getFeeReceiver(), receiver);
     }
 
     function testSetMintFeeOverLimit() public {
@@ -73,7 +73,7 @@ contract USDTOnRunesTest is Test {
     function testSetMintFee() public {
         uint256 mintFee = _getUSDTAmount(1);
         vm.expectEmit(false, false, false, true);
-        emit IUSDTOnRunes.MintFeeUpdated(mintFee);
+        emit IStableCoinOnRunes.MintFeeUpdated(mintFee);
         vm.prank(feeManager);
         usdtor.setMintFee(mintFee);
         assertEq(usdtor.getMintFee(), mintFee);
@@ -89,7 +89,7 @@ contract USDTOnRunesTest is Test {
     function testSetRedeemFee() public {
         uint256 redeemFee = _getUSDTAmount(1);
         vm.expectEmit(false, false, false, true);
-        emit IUSDTOnRunes.RedeemFeeUpdated(redeemFee);
+        emit IStableCoinOnRunes.RedeemFeeUpdated(redeemFee);
         vm.prank(feeManager);
         usdtor.setRedeemFee(redeemFee);
         assertEq(usdtor.getRedeemFee(), redeemFee);
@@ -105,7 +105,7 @@ contract USDTOnRunesTest is Test {
         vm.prank(alice);
         usdt.approve(address(usdtor), mintAmount);
         vm.expectEmit(true, true, true, true);
-        emit IUSDTOnRunes.Minted(alice, bitcoinAddress, mintAmount, usdtor.getMintFee());
+        emit IStableCoinOnRunes.Minted(alice, bitcoinAddress, mintAmount, usdtor.getMintFee());
         vm.prank(alice);
         usdtor.mint(bitcoinAddress, mintAmount);
         uint256 mintFee = usdtor.getMintFee();
@@ -134,7 +134,7 @@ contract USDTOnRunesTest is Test {
         usdtor.mint(bitcoinAddress, mintAmount);
         uint256 redeemAmount = mintAmount - usdtor.getMintFee();
         vm.expectEmit(true, true, true, true);
-        emit IUSDTOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, usdtor.getRedeemFee());
+        emit IStableCoinOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, usdtor.getRedeemFee());
         vm.prank(minter);
         usdtor.redeem(bitcoinTxId, alice, redeemAmount);
         assertEq(usdt.balanceOf(alice), aliceBalance - usdtor.getMintFee() - usdtor.getRedeemFee());

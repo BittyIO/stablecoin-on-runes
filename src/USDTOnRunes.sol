@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.27;
 
-import {IUSDTOnRunes} from "./IUSDTOnRunes.sol";
+import {IStableCoinOnRunes} from "./IStableCoinOnRunes.sol";
 import {Initializable} from "../lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {ERC165} from "../lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
@@ -14,7 +14,7 @@ import {TetherToken} from "../lib/usdt/TetherToken.sol";
 /**
  * @title Bridge USDT on EVMs to Bitcoin Runes
  */
-contract USDTOnRunes is IUSDTOnRunes, Ownable2Step, ERC165, Initializable, ReentrancyGuard, AccessControl {
+contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, ReentrancyGuard, AccessControl {
     error MintAmountLessThanMintFee();
     error WithdrawAmountMoreThanFee();
     error SetMintFeeOverLimit();
@@ -34,7 +34,7 @@ contract USDTOnRunes is IUSDTOnRunes, Ownable2Step, ERC165, Initializable, Reent
      * @inheritdoc ERC165
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
-        return interfaceId == type(IUSDTOnRunes).interfaceId || super.supportsInterface(interfaceId);
+        return interfaceId == type(IStableCoinOnRunes).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -80,11 +80,11 @@ contract USDTOnRunes is IUSDTOnRunes, Ownable2Step, ERC165, Initializable, Reent
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
-    function setReceiver(address receiver) external onlyRole(FEE_MANAGER_ROLE) {
+    function setFeeReceiver(address receiver) external onlyRole(FEE_MANAGER_ROLE) {
         feeReceiver = receiver;
     }
 
-    function getReceiver() external view returns (address) {
+    function getFeeReceiver() external view returns (address) {
         return feeReceiver;
     }
 
