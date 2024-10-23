@@ -22,7 +22,7 @@ contract DaiOnRunesTest is Test {
     function setUp() public {
         dai = new Dai(11155111);
         dor = new DaiOnRunes();
-        dor.initialize(address(dai), _getDaiAmount(2), address(this));
+        dor.initialize(address(dai));
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
         receiver = makeAddr("receiver");
@@ -35,6 +35,12 @@ contract DaiOnRunesTest is Test {
         mintAmount = _getDaiAmount(99);
         dor.grantRole(dor.FEE_MANAGER_ROLE(), address(feeManager));
         dor.grantRole(dor.MINTER_ROLE(), address(minter));
+        vm.prank(feeManager);
+        dor.setMintFee(_getDaiAmount(2));
+        vm.prank(feeManager);
+        dor.setRedeemFee(_getDaiAmount(2));
+        vm.prank(feeManager);
+        dor.setFeeReceiver(address(this));
     }
 
     function testSetReceiverRoleError() public {

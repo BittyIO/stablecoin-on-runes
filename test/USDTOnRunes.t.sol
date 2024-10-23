@@ -23,7 +23,7 @@ contract USDTOnRunesTest is Test {
         aliceBalance = _getUSDTAmount(100);
         usdt = new TetherToken(aliceBalance, "Tether USD", "USDT", 6);
         usdtor = new USDTOnRunes();
-        usdtor.initialize(address(usdt), _getUSDTAmount(2), address(this));
+        usdtor.initialize(address(usdt));
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
         receiver = makeAddr("receiver");
@@ -35,6 +35,12 @@ contract USDTOnRunesTest is Test {
         mintAmount = _getUSDTAmount(99);
         usdtor.grantRole(usdtor.FEE_MANAGER_ROLE(), address(feeManager));
         usdtor.grantRole(usdtor.MINTER_ROLE(), address(minter));
+        vm.prank(feeManager);
+        usdtor.setMintFee(_getUSDTAmount(2));
+        vm.prank(feeManager);
+        usdtor.setRedeemFee(_getUSDTAmount(2));
+        vm.prank(feeManager);
+        usdtor.setFeeReceiver(address(this));
     }
 
     function testSetReceiverRoleError() public {
