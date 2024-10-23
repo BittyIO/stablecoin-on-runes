@@ -40,11 +40,8 @@ contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     /**
      * @notice set diffrent fee for different networks
      */
-    function initialize(address usdtContract_, uint256 fee_, address feeReceiver_) public initializer {
+    function initialize(address usdtContract_) public initializer {
         usdt = TetherToken(usdtContract_);
-        mintFee = fee_;
-        redeemFee = fee_;
-        feeReceiver = feeReceiver_;
         usdt.approve(address(this), type(uint256).max);
         _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
         _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);

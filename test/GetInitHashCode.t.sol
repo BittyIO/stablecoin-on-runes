@@ -5,9 +5,19 @@ import "forge-std/console.sol";
 import "forge-std/Test.sol";
 import "ds-test/test.sol";
 import "../src/DaiOnRunes.sol";
+import "../src/USDTOnRunes.sol";
+import "../src/USDCOnRunes.sol";
 
 contract GetInitCodeHashTest is Test {
-    function testGetInitCodeHash() public pure {
+    function testGetUSDTInitCodeHash() public pure {
+        bytes memory bytecode = type(USDTOnRunes).creationCode;
+        console.logBytes32(keccak256(abi.encodePacked(bytecode)));
+    }
+    function testGetUSDCInitCodeHash() public pure {
+        bytes memory bytecode = type(USDCOnRunes).creationCode;
+        console.logBytes32(keccak256(abi.encodePacked(bytecode)));
+    }
+    function testGetDaiInitCodeHash() public pure {
         bytes memory bytecode = type(DaiOnRunes).creationCode;
         console.logBytes32(keccak256(abi.encodePacked(bytecode)));
     }

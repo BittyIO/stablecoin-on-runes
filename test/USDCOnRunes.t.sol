@@ -27,7 +27,7 @@ contract USDCOnRunesTest is Test {
         usdc.configureMinter(address(this), aliceBalance * 2);
         usdc.mint(address(usdc), aliceBalance);
         usdcor = new USDCOnRunes();
-        usdcor.initialize(address(usdc), _getUSDCAmount(2), address(this));
+        usdcor.initialize(address(usdc));
         bitcoinAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
         bitcoinTxId = "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16";
         receiver = makeAddr("receiver");
@@ -39,6 +39,12 @@ contract USDCOnRunesTest is Test {
         mintAmount = _getUSDCAmount(99);
         usdcor.grantRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager));
         usdcor.grantRole(usdcor.MINTER_ROLE(), address(minter));
+        vm.prank(feeManager);
+        usdcor.setMintFee(_getUSDCAmount(2));
+        vm.prank(feeManager);
+        usdcor.setRedeemFee(_getUSDCAmount(2));
+        vm.prank(feeManager);
+        usdcor.setFeeReceiver(address(this));
     }
 
     function testSetReceiverRoleError() public {
