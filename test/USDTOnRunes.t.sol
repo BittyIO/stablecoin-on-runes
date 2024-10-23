@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "ds-test/test.sol";
 import "../src/USDTOnRunes.sol";
 import "../src/IStableCoinOnRunes.sol";
+import {TetherToken} from "../lib/usdt/TetherToken.sol";
 
 contract USDTOnRunesTest is Test {
     USDTOnRunes public usdtor;

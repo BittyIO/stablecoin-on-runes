@@ -10,7 +10,10 @@ import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/security/
 import {Ownable2Step} from "../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
-import {Dai} from "../lib/dss/src/dai.sol";
+interface DaiInterface {
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+    function approve(address usr, uint wad) external returns (bool);
+}
 
 /**
  * @title Bridge Dai on EVMs to Bitcoin Runes
@@ -28,7 +31,7 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
     uint256 private mintFee;
     uint256 private redeemFee;
     address private feeReceiver;
-    Dai private dai;
+    DaiInterface private dai;
 
     /**
      * @inheritdoc ERC165
@@ -37,11 +40,15 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
         return interfaceId == type(IStableCoinOnRunes).interfaceId || super.supportsInterface(interfaceId);
     }
 
+    constructor() {
+        transferOwnership(tx.origin);
+    }
+
     /**
      * @notice set diffrent fee for different networks
      */
     function initialize(address daiContract_) public initializer {
-        dai = Dai(daiContract_);
+        dai = DaiInterface(daiContract_);
         dai.approve(address(this), type(uint256).max);
         _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
         _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);

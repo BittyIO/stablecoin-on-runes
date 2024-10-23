@@ -3,6 +3,7 @@ pragma solidity ^0.8.27;
 
 import "forge-std/Test.sol";
 import "ds-test/test.sol";
+import "../lib/dss/src/dai.sol";
 import "../src/DaiOnRunes.sol";
 import "../src/IStableCoinOnRunes.sol";
 

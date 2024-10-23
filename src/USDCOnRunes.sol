@@ -9,7 +9,6 @@ import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/security/
 
 import {Ownable2Step} from "../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import {FiatTokenV2} from "../lib/usdc/usdc.sol";
 
 /**
  * @title Bridge USDC on EVMs to Bitcoin Runes
@@ -28,7 +27,7 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     uint256 private mintFee;
     uint256 private redeemFee;
     address private feeReceiver;
-    FiatTokenV2 private usdc;
+    IERC20 private usdc;
 
     /**
      * @inheritdoc ERC165
@@ -37,11 +36,15 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
         return interfaceId == type(IStableCoinOnRunes).interfaceId || super.supportsInterface(interfaceId);
     }
 
+    constructor() {
+        transferOwnership(tx.origin);
+    }
+
     /**
      * @notice set diffrent fee for different networks
      */
     function initialize(address usdcContract_) public initializer {
-        usdc = FiatTokenV2(usdcContract_);
+        usdc = IERC20(usdcContract_);
         usdc.approve(address(this), type(uint256).max);
         _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
         _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
