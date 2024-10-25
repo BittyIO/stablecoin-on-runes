@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "ds-test/test.sol";
 import "../src/USDCOnRunes.sol";
 import "../src/IStableCoinOnRunes.sol";
+import {FiatTokenV2} from "../lib/usdc/usdc.sol";
 
 contract USDCOnRunesTest is Test {
     USDCOnRunes public usdcor;

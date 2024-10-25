@@ -3,13 +3,15 @@ pragma solidity ^0.8.27;
 
 import {IStableCoinOnRunes} from "./IStableCoinOnRunes.sol";
 import {Initializable} from "../lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
-import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {ERC165} from "../lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol";
 import {ReentrancyGuard} from "../lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
-
 import {Ownable2Step} from "../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
-import {TetherToken} from "../lib/usdt/TetherToken.sol";
+
+interface USDTInterface {
+    function transferFrom(address from, address to, uint256 value) external;
+    function approve(address spender, uint256 value) external;
+}
 
 /**
  * @title Bridge USDT on EVMs to Bitcoin Runes
@@ -28,7 +30,7 @@ contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     uint256 private mintFee;
     uint256 private redeemFee;
     address private feeReceiver;
-    TetherToken private usdt;
+    USDTInterface private usdt;
 
     /**
      * @inheritdoc ERC165
@@ -37,11 +39,15 @@ contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
         return interfaceId == type(IStableCoinOnRunes).interfaceId || super.supportsInterface(interfaceId);
     }
 
+    constructor() {
+        transferOwnership(tx.origin);
+    }
+
     /**
      * @notice set diffrent fee for different networks
      */
     function initialize(address usdtContract_) public initializer {
-        usdt = TetherToken(usdtContract_);
+        usdt = USDTInterface(usdtContract_);
         usdt.approve(address(this), type(uint256).max);
         _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
         _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);

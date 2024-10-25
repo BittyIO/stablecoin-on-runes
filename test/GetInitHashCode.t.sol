@@ -21,4 +21,11 @@ contract GetInitCodeHashTest is Test {
         bytes memory bytecode = type(DaiOnRunes).creationCode;
         console.logBytes32(keccak256(abi.encodePacked(bytecode)));
     }
+
+    function testGetRole() public pure {
+        bytes32 minterRole = keccak256("MINTER_ROLE");
+        console.logBytes32(minterRole);
+        bytes32 feeManagerRole = keccak256("FEE_MANAGER_ROLE");
+        console.logBytes32(feeManagerRole);
+    }
 }
