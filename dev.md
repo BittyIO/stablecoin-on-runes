@@ -23,8 +23,7 @@ install [prettier-solidity](https://github.com/prettier-solidity/prettier-plugin
 npx prettier --write --plugin=prettier-plugin-solidity 'src/**/*.sol' 'test/**/*.sol'
 ```
 
-- get salt by [create2crunch](https://github.com/0age/create2crunch) and change it in [deploy usdt script](https://github.com/BittyIO/stabecoin-on-runes/blob/main/script/deploy.usdt.s.sol#L23), [deploy usdc script](https://github.com/BittyIO/stabecoin-on-runes/blob/main/script/deploy.usdc.s.sol#L23), [deploy dai script](https://github.com/BittyIO/stabecoin-on-runes/blob/main/script/deploy.dai.s.sol#L23)
-
+- get salt by [create2crunch](https://github.com/0age/create2crunch) and change it in [deploy usdt script](https://github.com/BittyIO/stablecoin-on-runes/blob/main/script/deploy.usdt.s.sol#L23), [deploy usdc script](https://github.com/BittyIO/stablecoin-on-runes/blob/main/script/deploy.usdc.s.sol#L23), [deploy dai script](https://github.com/BittyIO/stablecoin-on-runes/blob/main/script/deploy.dai.s.sol#L23)
 
 - deploy
 
