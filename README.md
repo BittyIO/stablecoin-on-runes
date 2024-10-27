@@ -26,8 +26,8 @@ Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin R
 ### USDC
 |Chain|Address|
 |---|---|
-|Ethereum Sepolia|[0x00000000100aaAF8Cff772A414b18168FA758af9](https://sepolia.etherscan.io/address/0x00000000100aaAF8Cff772A414b18168FA758af9)
-|Ethereum Mainnet|[0x00000000100aaAF8Cff772A414b18168FA758af9](https://etherscan.io/address/0x00000000100aaAF8Cff772A414b18168FA758af9)
+|Ethereum Sepolia|[0x000000003478689da15Ba5f898673e0d00ef2805](https://sepolia.etherscan.io/address/0x000000003478689da15Ba5f898673e0d00ef2805)
+|Ethereum Mainnet|[0x000000003478689da15Ba5f898673e0d00ef2805](https://etherscan.io/address/0x000000003478689da15Ba5f898673e0d00ef2805)
 
 ### Dai
 |Chain|Address|
