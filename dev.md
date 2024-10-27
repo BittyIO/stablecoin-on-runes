@@ -57,7 +57,7 @@ forge verify-check {GUID} \
       - Mainnet: ```0xdac17f958d2ee523a2206206994597c13d831ec7```
 
   - USDC
-      - Sepolia testnet: ```0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238```
+      - Sepolia testnet: ```0x00000000100aaAF8Cff772A414b18168FA758af9```
       - Mainnet: ```0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48```
 
   - Dai
