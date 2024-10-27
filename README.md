@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin Runes. As [Bitty](https://bitty.io) started with lending, and users need to borrow USDT, USDC, Dai against their assets, we've created Stable Coin on Runes to meet this demand.
+Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin Runes. As [Bitty](https://bitty.io) started with lending, and users need to borrow USDT, USDC, Dai against their assets, we bridge Stable Coin from EVM to Runes to meet this demand.
 
 ## Features
 
