@@ -38,6 +38,9 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
 
     constructor() {
         transferOwnership(tx.origin);
+        _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
     }
 
     /**
@@ -46,9 +49,6 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     function initialize(address usdcContract_) public initializer {
         usdc = IERC20(usdcContract_);
         usdc.approve(address(this), type(uint256).max);
-        _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -66,11 +66,11 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     /**
      * @notice No one can stop people send redeem tx on Bitcoin, if redeem amount less than redeem fee, user will receive nothing and the redeem money will be kept as fee, since bitcoin tx need fee so redeemFee should not be 0.
      */
-    function redeem(
-        string calldata bitcoinTxId,
-        address receiver,
-        uint256 amount
-    ) external nonReentrant onlyRole(MINTER_ROLE) {
+    function redeem(string calldata bitcoinTxId, address receiver, uint256 amount)
+        external
+        nonReentrant
+        onlyRole(MINTER_ROLE)
+    {
         if (amount <= redeemFee) {
             emit Redeemed(bitcoinTxId, receiver, 0, amount);
             return;
