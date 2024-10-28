@@ -17,10 +17,8 @@ forge test --gas-report
 ```
 
 - format code
-install [prettier-solidity](https://github.com/prettier-solidity/prettier-plugin-solidity)
-
 ```
-npx prettier --write --plugin=prettier-plugin-solidity 'src/**/*.sol' 'test/**/*.sol'
+forge fmt
 ```
 
 - get salt by [create2crunch](https://github.com/0age/create2crunch) and change it in [deploy usdt script](https://github.com/BittyIO/stablecoin-on-runes/blob/main/script/deploy.usdt.s.sol#L23), [deploy usdc script](https://github.com/BittyIO/stablecoin-on-runes/blob/main/script/deploy.usdc.s.sol#L23), [deploy dai script](https://github.com/BittyIO/stablecoin-on-runes/blob/main/script/deploy.dai.s.sol#L23)
