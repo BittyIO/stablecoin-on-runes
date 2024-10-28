@@ -12,7 +12,7 @@ import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/Acce
 
 interface DaiInterface {
     function transferFrom(address from, address to, uint256 value) external returns (bool);
-    function approve(address usr, uint wad) external returns (bool);
+    function approve(address usr, uint256 wad) external returns (bool);
 }
 
 /**
@@ -42,6 +42,9 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
 
     constructor() {
         transferOwnership(tx.origin);
+        _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
     }
 
     /**
@@ -50,9 +53,6 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
     function initialize(address daiContract_) public initializer {
         dai = DaiInterface(daiContract_);
         dai.approve(address(this), type(uint256).max);
-        _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -70,11 +70,11 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
     /**
      * @notice No one can stop people send redeem tx on Bitcoin, if redeem amount less than redeem fee, user will receive nothing and the redeem money will be kept as fee, since bitcoin tx need fee so redeemFee should not be 0.
      */
-    function redeem(
-        string calldata bitcoinTxId,
-        address receiver,
-        uint256 amount
-    ) external nonReentrant onlyRole(MINTER_ROLE) {
+    function redeem(string calldata bitcoinTxId, address receiver, uint256 amount)
+        external
+        nonReentrant
+        onlyRole(MINTER_ROLE)
+    {
         if (amount <= redeemFee) {
             emit Redeemed(bitcoinTxId, receiver, 0, amount);
             return;

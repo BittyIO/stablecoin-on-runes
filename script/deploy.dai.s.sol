@@ -28,7 +28,7 @@ contract Deploy is Script {
         address daiOnRunesAddress = factory.safeCreate2(salt, initCode);
         DaiOnRunes daiOnRunes = DaiOnRunes(daiOnRunesAddress);
         console2.log(address(daiOnRunes));
-	
+
         vm.stopBroadcast();
     }
 }

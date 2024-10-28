@@ -28,7 +28,7 @@ contract Deploy is Script {
         address usdtOnRunesAddress = factory.safeCreate2(salt, initCode);
         USDTOnRunes usdtOnRunes = USDTOnRunes(usdtOnRunesAddress);
         console2.log(address(usdtOnRunes));
-	
+
         vm.stopBroadcast();
     }
 }
