@@ -20,20 +20,20 @@ Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin R
 ### USDT
 |Chain|Address|
 |-----|-------|
-|Ethereum Sepolia|[0x000000000d54b63731ee90DF91642344CA8F2fb1](https://sepolia.etherscan.io/address/0x000000000d54b63731ee90DF91642344CA8F2fb1)
-|Ethereum Mainnet|[0x000000000d54b63731ee90DF91642344CA8F2fb1](https://etherscan.io/address/0x000000000d54b63731ee90DF91642344CA8F2fb1)
+|Ethereum Sepolia|[0x0000000042e019fb911C2574d934a081E6D199c8](https://sepolia.etherscan.io/address/0x0000000042e019fb911C2574d934a081E6D199c8)
+|Ethereum Mainnet|[0x0000000042e019fb911C2574d934a081E6D199c8](https://etherscan.io/address/0x0000000042e019fb911C2574d934a081E6D199c8)
 
 ### USDC
 |Chain|Address|
 |---|---|
-|Ethereum Sepolia|[0x000000003478689da15Ba5f898673e0d00ef2805](https://sepolia.etherscan.io/address/0x000000003478689da15Ba5f898673e0d00ef2805)
-|Ethereum Mainnet|[0x000000003478689da15Ba5f898673e0d00ef2805](https://etherscan.io/address/0x000000003478689da15Ba5f898673e0d00ef2805)
+|Ethereum Sepolia|[0x0000000030f400f934089CE101B558999FfE74d0](https://sepolia.etherscan.io/address/0x0000000030f400f934089CE101B558999FfE74d0)
+|Ethereum Mainnet|[0x0000000030f400f934089CE101B558999FfE74d0](https://etherscan.io/address/0x0000000030f400f934089CE101B558999FfE74d0)
 
 ### Dai
 |Chain|Address|
 |---|---|
-|Ethereum Sepolia|[0x0000000084ECDa8c83D3A4E7F639C23D739a27B2](https://sepolia.etherscan.io/address/0x0000000084ECDa8c83D3A4E7F639C23D739a27B2)
-|Ethereum Mainnet|[0x0000000084ECDa8c83D3A4E7F639C23D739a27B2](https://etherscan.io/address/0x0000000084ECDa8c83D3A4E7F639C23D739a27B2)
+|Ethereum Sepolia|[0x00000000946c10Cb61A08a94886003D7B199b475](https://sepolia.etherscan.io/address/0x00000000946c10Cb61A08a94886003D7B199b475)
+|Ethereum Mainnet|[0x00000000946c10Cb61A08a94886003D7B199b475](https://etherscan.io/address/0x00000000946c10Cb61A08a94886003D7B199b475)
 
 ## Bitcoin Runes for Stable Coin On Runes
 
