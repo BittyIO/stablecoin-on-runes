@@ -13,7 +13,7 @@ interface IStableCoinOnRunes {
      * @param amount The amount of Stable Coin minted
      * @param fee The fee charged for minting
      */
-    event Minted(address indexed from, string indexed bitcoinAddress, uint256 amount, uint256 fee);
+    event Minted(address indexed from, string bitcoinAddress, uint256 amount, uint256 fee);
 
     /**
      * @dev Emitted when Stable Coin is redeemed back to Ethereum
@@ -22,7 +22,7 @@ interface IStableCoinOnRunes {
      * @param amount The amount of Stable Coin redeemed
      * @param fee The fee charged for redeeming
      */
-    event Redeemed(string indexed bitcoinTxId, address indexed receiver, uint256 amount, uint256 fee);
+    event Redeemed(string bitcoinTxId, address indexed receiver, uint256 amount, uint256 fee);
 
     /**
      * @dev Emitted when the mint fee is updated

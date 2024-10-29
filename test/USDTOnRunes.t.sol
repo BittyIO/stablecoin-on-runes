@@ -122,6 +122,8 @@ contract USDTOnRunesTest is Test {
     }
 
     function testRedeemLessThanRedeemFee() public {
+        vm.prank(feeManager);
+        usdtor.setFeeReceiver(receiver);
         vm.prank(alice);
         usdt.approve(address(usdtor), mintAmount);
         vm.prank(alice);
@@ -130,8 +132,8 @@ contract USDTOnRunesTest is Test {
         vm.prank(minter);
         usdtor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(usdt.balanceOf(bob), 0);
-        assertEq(usdt.balanceOf(address(usdtor)), mintAmount - usdtor.getRedeemFee());
-        assertEq(usdt.balanceOf(address(this)), usdtor.getRedeemFee());
+        assertEq(usdt.balanceOf(address(usdtor)), mintAmount - usdtor.getMintFee() - redeemAmount);
+        assertEq(usdt.balanceOf(receiver), redeemAmount + usdtor.getMintFee());
     }
 
     function testRedeemUSDTOnRunes() public {

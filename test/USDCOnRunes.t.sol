@@ -126,6 +126,8 @@ contract USDCOnRunesTest is Test {
     }
 
     function testRedeemLessThanRedeemFee() public {
+        vm.prank(feeManager);
+        usdcor.setFeeReceiver(receiver);
         vm.prank(alice);
         usdc.approve(address(usdcor), mintAmount);
         vm.prank(alice);
@@ -134,8 +136,8 @@ contract USDCOnRunesTest is Test {
         vm.prank(minter);
         usdcor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(usdc.balanceOf(bob), 0);
-        assertEq(usdc.balanceOf(address(usdcor)), mintAmount - usdcor.getRedeemFee());
-        assertEq(usdc.balanceOf(address(this)), usdcor.getRedeemFee());
+        assertEq(usdc.balanceOf(receiver), redeemAmount + usdcor.getMintFee());
+        assertEq(usdc.balanceOf(address(usdcor)), mintAmount - usdcor.getMintFee() - redeemAmount);
     }
 
     function testRedeemUSDCOnRunes() public {
