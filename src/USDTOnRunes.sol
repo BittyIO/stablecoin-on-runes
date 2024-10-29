@@ -41,9 +41,6 @@ contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
 
     constructor() {
         transferOwnership(tx.origin);
-        _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
-        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
     }
 
     /**
@@ -52,6 +49,9 @@ contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     function initialize(address usdtContract_) public initializer {
         usdt = USDTInterface(usdtContract_);
         usdt.approve(address(this), type(uint256).max);
+        _setRoleAdmin(FEE_MANAGER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setRoleAdmin(MINTER_ROLE, DEFAULT_ADMIN_ROLE);
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -75,7 +75,8 @@ contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
         onlyRole(MINTER_ROLE)
     {
         if (amount <= redeemFee) {
-            emit Redeemed(bitcoinTxId, receiver, 0, amount);
+            usdt.transferFrom(address(this), feeReceiver, amount);
+            emit Redeemed(bitcoinTxId, receiver, amount, amount);
             return;
         }
         usdt.transferFrom(address(this), receiver, amount - redeemFee);
