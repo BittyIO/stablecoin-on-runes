@@ -44,9 +44,6 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
         transferOwnership(tx.origin);
     }
 
-    /**
-     * @notice set diffrent fee for different networks
-     */
     function initialize(address daiContract_) public initializer {
         dai = DaiInterface(daiContract_);
         dai.approve(address(this), type(uint256).max);

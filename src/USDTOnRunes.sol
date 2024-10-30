@@ -43,9 +43,6 @@ contract USDTOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
         transferOwnership(tx.origin);
     }
 
-    /**
-     * @notice set diffrent fee for different networks
-     */
     function initialize(address usdtContract_) public initializer {
         usdt = USDTInterface(usdtContract_);
         usdt.approve(address(this), type(uint256).max);

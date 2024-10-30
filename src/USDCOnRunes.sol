@@ -40,9 +40,6 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
         transferOwnership(tx.origin);
     }
 
-    /**
-     * @notice set diffrent fee for different networks
-     */
     function initialize(address usdcContract_) public initializer {
         usdc = IERC20(usdcContract_);
         usdc.approve(address(this), type(uint256).max);
