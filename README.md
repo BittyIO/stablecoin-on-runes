@@ -35,6 +35,9 @@ Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin R
 |Ethereum Sepolia|[0x00000000946c10Cb61A08a94886003D7B199b475](https://sepolia.etherscan.io/address/0x00000000946c10Cb61A08a94886003D7B199b475)
 |Ethereum Mainnet|[0x00000000946c10Cb61A08a94886003D7B199b475](https://etherscan.io/address/0x00000000946c10Cb61A08a94886003D7B199b475)
 
+## Developers
+For developers, welcome new issue or PR, check doc [here](https://github.com/BittyIO/stablecoin-on-runes/blob/main/dev.md)
+
 ## Bitcoin Runes for Stable Coin On Runes
 
 This section is currently under development. More information will be provided in future updates.
