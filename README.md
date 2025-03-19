@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin Runes. As [Bitty](https://bitty.io) started with lending, and users need to borrow USDT, USDC, Dai against their assets, we bridge Stable Coin from EVM to Runes to meet this demand.
+Stable Coin on Runes is a project that bridges USDT/USDC on EVM to Bitcoin Runes. As [Bitty](https://bitty.io) started with lending, and users need to borrow USDT, USDC, Dai against their assets, we bridge Stable Coin from EVM to Runes to meet this demand.
 
 ## Features
 
@@ -28,12 +28,6 @@ Stable Coin on Runes is a project that bridges USDT/USDC/Dai-on-EVM to Bitcoin R
 |---|---|
 |Ethereum Sepolia|[0x0000000030f400f934089CE101B558999FfE74d0](https://sepolia.etherscan.io/address/0x0000000030f400f934089CE101B558999FfE74d0)
 |Ethereum Mainnet|[0x0000000030f400f934089CE101B558999FfE74d0](https://etherscan.io/address/0x0000000030f400f934089CE101B558999FfE74d0)
-
-### Dai
-|Chain|Address|
-|---|---|
-|Ethereum Sepolia|[0x00000000946c10Cb61A08a94886003D7B199b475](https://sepolia.etherscan.io/address/0x00000000946c10Cb61A08a94886003D7B199b475)
-|Ethereum Mainnet|[0x00000000946c10Cb61A08a94886003D7B199b475](https://etherscan.io/address/0x00000000946c10Cb61A08a94886003D7B199b475)
 
 ## Developers
 For developers, welcome new issue or PR, check doc [here](https://github.com/BittyIO/stablecoin-on-runes/blob/main/dev.md)
