@@ -13,11 +13,19 @@ import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/Acce
 /**
  * @title Bridge USDC on EVMs to Bitcoin Runes
  */
-contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, ReentrancyGuard, AccessControl {
+contract USDCOnRunes is
+    IStableCoinOnRunes,
+    Ownable2Step,
+    ERC165,
+    Initializable,
+    ReentrancyGuard,
+    AccessControl
+{
     error MintAmountLessThanMintFee();
     error WithdrawAmountMoreThanFee();
     error SetMintFeeOverLimit();
     error SetRedeemFeeOverLimit();
+    error BitcoinTxAlreadySent();
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
@@ -29,11 +37,17 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     address private feeReceiver;
     IERC20 private usdc;
 
+    mapping(bytes32 => bool) private isBitcoinTxSent;
+
     /**
      * @inheritdoc ERC165
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
-        return interfaceId == type(IStableCoinOnRunes).interfaceId || super.supportsInterface(interfaceId);
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165, AccessControl) returns (bool) {
+        return
+            interfaceId == type(IStableCoinOnRunes).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     constructor() {
@@ -51,7 +65,10 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     /**
      * @notice Since bitcoin tx send Runes to users need transaction fee so mintFee should not be 0.
      */
-    function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {
+    function mint(
+        string calldata bitcoinAddress,
+        uint256 amount
+    ) external nonReentrant {
         if (amount <= mintFee) {
             revert MintAmountLessThanMintFee();
         }
@@ -63,22 +80,30 @@ contract USDCOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable,
     /**
      * @notice No one can stop people send redeem tx on Bitcoin, if redeem amount less than redeem fee, user will receive nothing and the redeem money will be kept as fee, since bitcoin tx need fee so redeemFee should not be 0.
      */
-    function redeem(string calldata bitcoinTxId, address receiver, uint256 amount)
-        external
-        nonReentrant
-        onlyRole(MINTER_ROLE)
-    {
+    function redeem(
+        string calldata bitcoinTxId,
+        address receiver,
+        uint256 amount
+    ) external nonReentrant onlyRole(MINTER_ROLE) {
+        bytes32 bitcoinTxIdHash = keccak256(abi.encodePacked(bitcoinTxId));
+        if (isBitcoinTxSent[bitcoinTxIdHash]) {
+            revert BitcoinTxAlreadySent();
+        }
         if (amount <= redeemFee) {
             usdc.transferFrom(address(this), feeReceiver, amount);
+            isBitcoinTxSent[bitcoinTxIdHash] = true;
             emit Redeemed(bitcoinTxId, receiver, amount, amount);
             return;
         }
         usdc.transferFrom(address(this), receiver, amount - redeemFee);
         usdc.transferFrom(address(this), feeReceiver, redeemFee);
+        isBitcoinTxSent[bitcoinTxIdHash] = true;
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
-    function setFeeReceiver(address receiver) external onlyRole(FEE_MANAGER_ROLE) {
+    function setFeeReceiver(
+        address receiver
+    ) external onlyRole(FEE_MANAGER_ROLE) {
         feeReceiver = receiver;
     }
 

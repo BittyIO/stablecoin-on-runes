@@ -11,19 +11,30 @@ import {Ownable2Step} from "../lib/openzeppelin-contracts/contracts/access/Ownab
 import {AccessControl} from "../lib/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 interface DaiInterface {
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external returns (bool);
     function approve(address usr, uint256 wad) external returns (bool);
 }
 
 /**
  * @title Bridge Dai on EVMs to Bitcoin Runes
  */
-contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, ReentrancyGuard, AccessControl {
+contract DaiOnRunes is
+    IStableCoinOnRunes,
+    Ownable2Step,
+    ERC165,
+    Initializable,
+    ReentrancyGuard,
+    AccessControl
+{
     error MintAmountLessThanMintFee();
     error WithdrawAmountMoreThanFee();
     error SetMintFeeOverLimit();
     error SetRedeemFeeOverLimit();
-
+    error BitcoinTxAlreadySent();
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
     uint256 constant MAX_FEE = 10 * 1e18;
@@ -32,12 +43,17 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
     uint256 private redeemFee;
     address private feeReceiver;
     DaiInterface private dai;
+    mapping(bytes32 => bool) private isBitcoinTxSent;
 
     /**
      * @inheritdoc ERC165
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
-        return interfaceId == type(IStableCoinOnRunes).interfaceId || super.supportsInterface(interfaceId);
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165, AccessControl) returns (bool) {
+        return
+            interfaceId == type(IStableCoinOnRunes).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     constructor() {
@@ -55,7 +71,10 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
     /**
      * @notice Since bitcoin tx send Runes to users need transaction fee so mintFee should not be 0.
      */
-    function mint(string calldata bitcoinAddress, uint256 amount) external nonReentrant {
+    function mint(
+        string calldata bitcoinAddress,
+        uint256 amount
+    ) external nonReentrant {
         if (amount <= mintFee) {
             revert MintAmountLessThanMintFee();
         }
@@ -67,22 +86,28 @@ contract DaiOnRunes is IStableCoinOnRunes, Ownable2Step, ERC165, Initializable, 
     /**
      * @notice No one can stop people send redeem tx on Bitcoin, if redeem amount less than redeem fee, user will receive nothing and the redeem money will be kept as fee, since bitcoin tx need fee so redeemFee should not be 0.
      */
-    function redeem(string calldata bitcoinTxId, address receiver, uint256 amount)
-        external
-        nonReentrant
-        onlyRole(MINTER_ROLE)
-    {
+    function redeem(
+        string calldata bitcoinTxId,
+        address receiver,
+        uint256 amount
+    ) external nonReentrant onlyRole(MINTER_ROLE) {
+        bytes32 bitcoinTxIdHash = keccak256(abi.encodePacked(bitcoinTxId));
+        require(!isBitcoinTxSent[bitcoinTxIdHash], BitcoinTxAlreadySent());
         if (amount <= redeemFee) {
             dai.transferFrom(address(this), feeReceiver, amount);
+            isBitcoinTxSent[bitcoinTxIdHash] = true;
             emit Redeemed(bitcoinTxId, receiver, amount, amount);
             return;
         }
         dai.transferFrom(address(this), receiver, amount - redeemFee);
         dai.transferFrom(address(this), feeReceiver, redeemFee);
+        isBitcoinTxSent[bitcoinTxIdHash] = true;
         emit Redeemed(bitcoinTxId, receiver, amount, redeemFee);
     }
 
-    function setFeeReceiver(address receiver) external onlyRole(FEE_MANAGER_ROLE) {
+    function setFeeReceiver(
+        address receiver
+    ) external onlyRole(FEE_MANAGER_ROLE) {
         feeReceiver = receiver;
     }
 

@@ -23,7 +23,16 @@ contract USDCOnRunesTest is Test {
     function setUp() public {
         aliceBalance = _getUSDCAmount(100);
         usdc = new FiatTokenV2();
-        usdc.initialize("USD Coin", "USDC", "USD", 6, address(this), address(this), address(this), address(this));
+        usdc.initialize(
+            "USD Coin",
+            "USDC",
+            "USD",
+            6,
+            address(this),
+            address(this),
+            address(this),
+            address(this)
+        );
         usdc.initializeV2("USD Coin");
         usdc.configureMinter(address(this), aliceBalance * 2);
         usdc.mint(address(usdc), aliceBalance);
@@ -60,7 +69,9 @@ contract USDCOnRunesTest is Test {
 
     function testSetReceiverWithRightRole() public {
         vm.prank(address(this));
-        assertTrue(usdcor.hasRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager)));
+        assertTrue(
+            usdcor.hasRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager))
+        );
         vm.prank(feeManager);
         usdcor.setFeeReceiver(receiver);
         assertEq(usdcor.getFeeReceiver(), receiver);
@@ -68,7 +79,9 @@ contract USDCOnRunesTest is Test {
 
     function testSetMinterWithRightRole() public {
         vm.prank(address(this));
-        assertTrue(usdcor.hasRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager)));
+        assertTrue(
+            usdcor.hasRole(usdcor.FEE_MANAGER_ROLE(), address(feeManager))
+        );
         vm.prank(feeManager);
         usdcor.setFeeReceiver(receiver);
         assertEq(usdcor.getFeeReceiver(), receiver);
@@ -116,7 +129,12 @@ contract USDCOnRunesTest is Test {
         vm.prank(alice);
         usdc.approve(address(usdcor), mintAmount);
         vm.expectEmit(true, true, true, true);
-        emit IStableCoinOnRunes.Minted(alice, bitcoinAddress, mintAmount, usdcor.getMintFee());
+        emit IStableCoinOnRunes.Minted(
+            alice,
+            bitcoinAddress,
+            mintAmount,
+            usdcor.getMintFee()
+        );
         vm.prank(alice);
         usdcor.mint(bitcoinAddress, mintAmount);
         uint256 mintFee = usdcor.getMintFee();
@@ -137,7 +155,10 @@ contract USDCOnRunesTest is Test {
         usdcor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(usdc.balanceOf(bob), 0);
         assertEq(usdc.balanceOf(receiver), redeemAmount + usdcor.getMintFee());
-        assertEq(usdc.balanceOf(address(usdcor)), mintAmount - usdcor.getMintFee() - redeemAmount);
+        assertEq(
+            usdc.balanceOf(address(usdcor)),
+            mintAmount - usdcor.getMintFee() - redeemAmount
+        );
     }
 
     function testRedeemUSDCOnRunes() public {
@@ -147,12 +168,35 @@ contract USDCOnRunesTest is Test {
         usdcor.mint(bitcoinAddress, mintAmount);
         uint256 redeemAmount = mintAmount - usdcor.getMintFee();
         vm.expectEmit(true, true, true, true);
-        emit IStableCoinOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, usdcor.getRedeemFee());
+        emit IStableCoinOnRunes.Redeemed(
+            bitcoinTxId,
+            alice,
+            redeemAmount,
+            usdcor.getRedeemFee()
+        );
         vm.prank(minter);
         usdcor.redeem(bitcoinTxId, alice, redeemAmount);
-        assertEq(usdc.balanceOf(alice), aliceBalance - usdcor.getMintFee() - usdcor.getRedeemFee());
+        assertEq(
+            usdc.balanceOf(alice),
+            aliceBalance - usdcor.getMintFee() - usdcor.getRedeemFee()
+        );
         assertEq(usdc.balanceOf(address(usdcor)), 0);
-        assertEq(usdc.balanceOf(address(this)), usdcor.getRedeemFee() + usdcor.getMintFee());
+        assertEq(
+            usdc.balanceOf(address(this)),
+            usdcor.getRedeemFee() + usdcor.getMintFee()
+        );
+    }
+
+    function testRedeemSameBitcoinTxId() public {
+        vm.prank(alice);
+        usdc.approve(address(usdcor), mintAmount);
+        vm.prank(alice);
+        usdcor.mint(bitcoinAddress, mintAmount);
+        vm.prank(minter);
+        usdcor.redeem(bitcoinTxId, alice, mintAmount);
+        vm.expectRevert(USDCOnRunes.BitcoinTxAlreadySent.selector);
+        vm.prank(minter);
+        usdcor.redeem(bitcoinTxId, alice, mintAmount);
     }
 
     function _getUSDCAmount(uint256 amount) internal pure returns (uint256) {
