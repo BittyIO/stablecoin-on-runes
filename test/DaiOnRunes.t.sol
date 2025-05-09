@@ -112,7 +112,12 @@ contract DaiOnRunesTest is Test {
         vm.prank(alice);
         dai.approve(address(dor), mintAmount);
         vm.expectEmit(true, true, true, true);
-        emit IStableCoinOnRunes.Minted(alice, bitcoinAddress, mintAmount, dor.getMintFee());
+        emit IStableCoinOnRunes.Minted(
+            alice,
+            bitcoinAddress,
+            mintAmount,
+            dor.getMintFee()
+        );
         vm.prank(alice);
         dor.mint(bitcoinAddress, mintAmount);
         uint256 mintFee = dor.getMintFee();
@@ -133,7 +138,10 @@ contract DaiOnRunesTest is Test {
         dor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(dai.balanceOf(bob), 0);
         assertEq(dai.balanceOf(receiver), redeemAmount + dor.getMintFee());
-        assertEq(dai.balanceOf(address(dor)), mintAmount - dor.getMintFee() - redeemAmount);
+        assertEq(
+            dai.balanceOf(address(dor)),
+            mintAmount - dor.getMintFee() - redeemAmount
+        );
     }
 
     function testRedeemDaiOnRunes() public {
@@ -143,12 +151,23 @@ contract DaiOnRunesTest is Test {
         dor.mint(bitcoinAddress, mintAmount);
         uint256 redeemAmount = mintAmount - dor.getMintFee();
         vm.expectEmit(true, true, true, true);
-        emit IStableCoinOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, dor.getRedeemFee());
+        emit IStableCoinOnRunes.Redeemed(
+            bitcoinTxId,
+            alice,
+            redeemAmount,
+            dor.getRedeemFee()
+        );
         vm.prank(minter);
         dor.redeem(bitcoinTxId, alice, redeemAmount);
-        assertEq(dai.balanceOf(alice), aliceBalance - dor.getMintFee() - dor.getRedeemFee());
+        assertEq(
+            dai.balanceOf(alice),
+            aliceBalance - dor.getMintFee() - dor.getRedeemFee()
+        );
         assertEq(dai.balanceOf(address(dor)), 0);
-        assertEq(dai.balanceOf(address(this)), dor.getRedeemFee() + dor.getMintFee());
+        assertEq(
+            dai.balanceOf(address(this)),
+            dor.getRedeemFee() + dor.getMintFee()
+        );
     }
 
     function _getDaiAmount(uint256 amount) internal pure returns (uint256) {

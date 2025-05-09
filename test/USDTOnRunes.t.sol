@@ -56,7 +56,9 @@ contract USDTOnRunesTest is Test {
 
     function testSetReceiverWithRightRole() public {
         vm.prank(address(this));
-        assertTrue(usdtor.hasRole(usdtor.FEE_MANAGER_ROLE(), address(feeManager)));
+        assertTrue(
+            usdtor.hasRole(usdtor.FEE_MANAGER_ROLE(), address(feeManager))
+        );
         vm.prank(feeManager);
         usdtor.setFeeReceiver(receiver);
         assertEq(usdtor.getFeeReceiver(), receiver);
@@ -64,7 +66,9 @@ contract USDTOnRunesTest is Test {
 
     function testSetMinterWithRightRole() public {
         vm.prank(address(this));
-        assertTrue(usdtor.hasRole(usdtor.FEE_MANAGER_ROLE(), address(feeManager)));
+        assertTrue(
+            usdtor.hasRole(usdtor.FEE_MANAGER_ROLE(), address(feeManager))
+        );
         vm.prank(feeManager);
         usdtor.setFeeReceiver(receiver);
         assertEq(usdtor.getFeeReceiver(), receiver);
@@ -112,7 +116,12 @@ contract USDTOnRunesTest is Test {
         vm.prank(alice);
         usdt.approve(address(usdtor), mintAmount);
         vm.expectEmit(true, true, true, true);
-        emit IStableCoinOnRunes.Minted(alice, bitcoinAddress, mintAmount, usdtor.getMintFee());
+        emit IStableCoinOnRunes.Minted(
+            alice,
+            bitcoinAddress,
+            mintAmount,
+            usdtor.getMintFee()
+        );
         vm.prank(alice);
         usdtor.mint(bitcoinAddress, mintAmount);
         uint256 mintFee = usdtor.getMintFee();
@@ -132,7 +141,10 @@ contract USDTOnRunesTest is Test {
         vm.prank(minter);
         usdtor.redeem(bitcoinTxId, bob, redeemAmount);
         assertEq(usdt.balanceOf(bob), 0);
-        assertEq(usdt.balanceOf(address(usdtor)), mintAmount - usdtor.getMintFee() - redeemAmount);
+        assertEq(
+            usdt.balanceOf(address(usdtor)),
+            mintAmount - usdtor.getMintFee() - redeemAmount
+        );
         assertEq(usdt.balanceOf(receiver), redeemAmount + usdtor.getMintFee());
     }
 
@@ -143,12 +155,23 @@ contract USDTOnRunesTest is Test {
         usdtor.mint(bitcoinAddress, mintAmount);
         uint256 redeemAmount = mintAmount - usdtor.getMintFee();
         vm.expectEmit(true, true, true, true);
-        emit IStableCoinOnRunes.Redeemed(bitcoinTxId, alice, redeemAmount, usdtor.getRedeemFee());
+        emit IStableCoinOnRunes.Redeemed(
+            bitcoinTxId,
+            alice,
+            redeemAmount,
+            usdtor.getRedeemFee()
+        );
         vm.prank(minter);
         usdtor.redeem(bitcoinTxId, alice, redeemAmount);
-        assertEq(usdt.balanceOf(alice), aliceBalance - usdtor.getMintFee() - usdtor.getRedeemFee());
+        assertEq(
+            usdt.balanceOf(alice),
+            aliceBalance - usdtor.getMintFee() - usdtor.getRedeemFee()
+        );
         assertEq(usdt.balanceOf(address(usdtor)), 0);
-        assertEq(usdt.balanceOf(address(this)), usdtor.getRedeemFee() + usdtor.getMintFee());
+        assertEq(
+            usdt.balanceOf(address(this)),
+            usdtor.getRedeemFee() + usdtor.getMintFee()
+        );
     }
 
     function _getUSDTAmount(uint256 amount) internal pure returns (uint256) {
